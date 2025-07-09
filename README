@@ -1,0 +1,37 @@
+Model: GLN_simu_test.ipynb
+Creation Date: 11.12.2024
+Last Update: 16.03.2024
+Author (s): Beatriz Royo
+
+*************************************************
+INPUTS
+*************************************************
+STATIC DATA
+
+	demand2.json: monthly demand of two products during 15 months
+	demand2_metadata.json: metadata (previous file but with the metadata) - NEW
+	BOM.json: desription of the products characteristics such as production rates along with the materials are manufactured and the supplier ID
+	BOM_metadata.json: metadata (previous file with the metadata) - NEW
+	suppliers.json: description of the suppliers with the location, distance, replenishment policy (order point, MOQ, lead time)
+	supplier_smetadata.json: metadata (previous file with the metadata) - NEW
+	forecast_GLN.csv: csv with prices forecated by other model
+DYNAMIC DATA
+	main_parameters.json: characteristics for each simulation ([simulation_name], demand variation, init week of shortage, end week of shortage)
+	main_parameters_metadata.json: metadata (previous file with the metadata) - NEW
+*************************************************************
+OUTPUTS:
+**************************************************************
+	results\simulation_inventory.json: file with the metadata and data with the data of the IOH and ITI and FI (already examined in LMS platform)
+	results\comparison_results.json: file with the metadata and data with the percentages of change in the performance KPIS in comparison with the AS IS scenario.
+	results\simulation.csv: KPIs in csv format
+	results\simulation.json: KPIs in json format
+	results\[simulation_name]_combined.png: graph combining the IOH and IT
+	results\[simulation_name]_individual.png: graph with five individuals graphs: ITI, IOH, FI piece 1, FI piece 2, Demand
+
+*************************************************************
+Dependencies:
+**************************************************************
+	GLN_IO.py: python script for managing input/ ouputs
+	MTS_Orders.py: python script with class MTS_Orders
+	GLN_simulation_environment v1.0.yaml: configuration file
+ 

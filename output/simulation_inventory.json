@@ -1,0 +1,393 @@
+{
+    "metadata": {
+        "description": "This JSON file contains weekly inventory levels for GLN plast.",
+        "columns": {
+            "week": {
+                "type": "integer",
+                "description": "Week number in the planning period."
+            },
+            "inventory_OH": {
+                "type": "number",
+                "description": "On-hand inventory at the end of the week (kg)."
+            },
+            "inventory_IT": {
+                "type": "number",
+                "description": "Inventory in transit from the supplier to the destination (kg)."
+            },
+            "inventory_FI_E3": {
+                "type": "number",
+                "description": "Finished inventory at location E3 (number of units)."
+            },
+            "inventory_FI_C3": {
+                "type": "number",
+                "description": "Finished inventory at location C3 (number of units)."
+            }
+        }
+    },
+    "data": [
+        {
+            "week": 0,
+            "inventory_OH": 299.0,
+            "inventory_IT": 3167.021,
+            "inventory_FI_E3": 8696.0,
+            "inventory_FI_C3": 8696.0
+        },
+        {
+            "week": 1,
+            "inventory_OH": 199.0,
+            "inventory_IT": 3167.021,
+            "inventory_FI_E3": 17392.0,
+            "inventory_FI_C3": 17392.0
+        },
+        {
+            "week": 2,
+            "inventory_OH": 99.0,
+            "inventory_IT": 3167.021,
+            "inventory_FI_E3": 26088.0,
+            "inventory_FI_C3": 26088.0
+        },
+        {
+            "week": 3,
+            "inventory_OH": 0.0,
+            "inventory_IT": 3167.021,
+            "inventory_FI_E3": 10256.0,
+            "inventory_FI_C3": 10256.0
+        },
+        {
+            "week": 4,
+            "inventory_OH": 458.0,
+            "inventory_IT": 2555.795,
+            "inventory_FI_E3": 10529.0,
+            "inventory_FI_C3": 10529.0
+        },
+        {
+            "week": 5,
+            "inventory_OH": 305.0,
+            "inventory_IT": 2555.795,
+            "inventory_FI_E3": 10802.0,
+            "inventory_FI_C3": 10802.0
+        },
+        {
+            "week": 6,
+            "inventory_OH": 152.0,
+            "inventory_IT": 2555.795,
+            "inventory_FI_E3": 11075.0,
+            "inventory_FI_C3": 11075.0
+        },
+        {
+            "week": 7,
+            "inventory_OH": 0.0,
+            "inventory_IT": 2555.795,
+            "inventory_FI_E3": 11348.0,
+            "inventory_FI_C3": 11348.0
+        },
+        {
+            "week": 8,
+            "inventory_OH": 599.0,
+            "inventory_IT": 1783.0,
+            "inventory_FI_E3": 8391.0,
+            "inventory_FI_C3": 8391.0
+        },
+        {
+            "week": 9,
+            "inventory_OH": 426.0,
+            "inventory_IT": 1783.0,
+            "inventory_FI_E3": 5434.0,
+            "inventory_FI_C3": 5434.0
+        },
+        {
+            "week": 10,
+            "inventory_OH": 253.0,
+            "inventory_IT": 1783.0,
+            "inventory_FI_E3": 27005.0,
+            "inventory_FI_C3": 27005.0
+        },
+        {
+            "week": 11,
+            "inventory_OH": 80.0,
+            "inventory_IT": 1783.0,
+            "inventory_FI_E3": 24048.0,
+            "inventory_FI_C3": 24048.0
+        },
+        {
+            "week": 12,
+            "inventory_OH": 473.0,
+            "inventory_IT": 3079.54,
+            "inventory_FI_E3": 27781.0,
+            "inventory_FI_C3": 27781.0
+        },
+        {
+            "week": 13,
+            "inventory_OH": 342.0,
+            "inventory_IT": 3079.54,
+            "inventory_FI_E3": 6986.0,
+            "inventory_FI_C3": 6986.0
+        },
+        {
+            "week": 14,
+            "inventory_OH": 211.0,
+            "inventory_IT": 3079.54,
+            "inventory_FI_E3": 10719.0,
+            "inventory_FI_C3": 10719.0
+        },
+        {
+            "week": 15,
+            "inventory_OH": 80.0,
+            "inventory_IT": 3079.54,
+            "inventory_FI_E3": 14452.0,
+            "inventory_FI_C3": 14452.0
+        },
+        {
+            "week": 16,
+            "inventory_OH": 551.0,
+            "inventory_IT": 2451.556,
+            "inventory_FI_E3": 14060.0,
+            "inventory_FI_C3": 14060.0
+        },
+        {
+            "week": 17,
+            "inventory_OH": 394.0,
+            "inventory_IT": 2451.556,
+            "inventory_FI_E3": 13668.0,
+            "inventory_FI_C3": 13668.0
+        },
+        {
+            "week": 18,
+            "inventory_OH": 237.0,
+            "inventory_IT": 2451.556,
+            "inventory_FI_E3": 13276.0,
+            "inventory_FI_C3": 13276.0
+        },
+        {
+            "week": 19,
+            "inventory_OH": 80.0,
+            "inventory_IT": 2451.556,
+            "inventory_FI_E3": 12884.0,
+            "inventory_FI_C3": 12884.0
+        },
+        {
+            "week": 20,
+            "inventory_OH": 581.0,
+            "inventory_IT": 1783.0,
+            "inventory_FI_E3": 10882.0,
+            "inventory_FI_C3": 10882.0
+        },
+        {
+            "week": 21,
+            "inventory_OH": 414.0,
+            "inventory_IT": 1783.0,
+            "inventory_FI_E3": 8880.0,
+            "inventory_FI_C3": 8880.0
+        },
+        {
+            "week": 22,
+            "inventory_OH": 247.0,
+            "inventory_IT": 1783.0,
+            "inventory_FI_E3": 6878.0,
+            "inventory_FI_C3": 6878.0
+        },
+        {
+            "week": 23,
+            "inventory_OH": 80.0,
+            "inventory_IT": 1783.0,
+            "inventory_FI_E3": 29404.0,
+            "inventory_FI_C3": 29404.0
+        },
+        {
+            "week": 24,
+            "inventory_OH": 613.0,
+            "inventory_IT": 3021.769,
+            "inventory_FI_E3": 25695.0,
+            "inventory_FI_C3": 25695.0
+        },
+        {
+            "week": 25,
+            "inventory_OH": 435.0,
+            "inventory_IT": 3021.769,
+            "inventory_FI_E3": 21986.0,
+            "inventory_FI_C3": 21986.0
+        },
+        {
+            "week": 26,
+            "inventory_OH": 258.0,
+            "inventory_IT": 3021.769,
+            "inventory_FI_E3": 18277.0,
+            "inventory_FI_C3": 18277.0
+        },
+        {
+            "week": 27,
+            "inventory_OH": 80.0,
+            "inventory_IT": 3021.769,
+            "inventory_FI_E3": 14568.0,
+            "inventory_FI_C3": 14568.0
+        },
+        {
+            "week": 28,
+            "inventory_OH": 437.0,
+            "inventory_IT": 2545.867,
+            "inventory_FI_E3": 20211.0,
+            "inventory_FI_C3": 20211.0
+        },
+        {
+            "week": 29,
+            "inventory_OH": 318.0,
+            "inventory_IT": 2545.867,
+            "inventory_FI_E3": 25854.0,
+            "inventory_FI_C3": 25854.0
+        },
+        {
+            "week": 30,
+            "inventory_OH": 199.0,
+            "inventory_IT": 2545.867,
+            "inventory_FI_E3": 6969.0,
+            "inventory_FI_C3": 6969.0
+        },
+        {
+            "week": 31,
+            "inventory_OH": 80.0,
+            "inventory_IT": 2545.867,
+            "inventory_FI_E3": 12612.0,
+            "inventory_FI_C3": 12612.0
+        },
+        {
+            "week": 32,
+            "inventory_OH": 652.0,
+            "inventory_IT": 1783.0,
+            "inventory_FI_E3": 6868.0,
+            "inventory_FI_C3": 6868.0
+        },
+        {
+            "week": 33,
+            "inventory_OH": 461.0,
+            "inventory_IT": 1783.0,
+            "inventory_FI_E3": 25652.0,
+            "inventory_FI_C3": 25652.0
+        },
+        {
+            "week": 34,
+            "inventory_OH": 270.0,
+            "inventory_IT": 1783.0,
+            "inventory_FI_E3": 19908.0,
+            "inventory_FI_C3": 19908.0
+        },
+        {
+            "week": 35,
+            "inventory_OH": 80.0,
+            "inventory_IT": 1783.0,
+            "inventory_FI_E3": 14164.0,
+            "inventory_FI_C3": 14164.0
+        },
+        {
+            "week": 36,
+            "inventory_OH": 717.0,
+            "inventory_IT": 3319.381,
+            "inventory_FI_E3": 29485.0,
+            "inventory_FI_C3": 29485.0
+        },
+        {
+            "week": 37,
+            "inventory_OH": 505.0,
+            "inventory_IT": 3319.381,
+            "inventory_FI_E3": 20278.0,
+            "inventory_FI_C3": 20278.0
+        },
+        {
+            "week": 38,
+            "inventory_OH": 292.0,
+            "inventory_IT": 3319.381,
+            "inventory_FI_E3": 11071.0,
+            "inventory_FI_C3": 11071.0
+        },
+        {
+            "week": 39,
+            "inventory_OH": 80.0,
+            "inventory_IT": 3319.381,
+            "inventory_FI_E3": 26392.0,
+            "inventory_FI_C3": 26392.0
+        },
+        {
+            "week": 40,
+            "inventory_OH": 705.0,
+            "inventory_IT": 2485.009,
+            "inventory_FI_E3": 17810.0,
+            "inventory_FI_C3": 17810.0
+        },
+        {
+            "week": 41,
+            "inventory_OH": 497.0,
+            "inventory_IT": 2485.009,
+            "inventory_FI_E3": 9228.0,
+            "inventory_FI_C3": 9228.0
+        },
+        {
+            "week": 42,
+            "inventory_OH": 288.0,
+            "inventory_IT": 2485.009,
+            "inventory_FI_E3": 25174.0,
+            "inventory_FI_C3": 25174.0
+        },
+        {
+            "week": 43,
+            "inventory_OH": 80.0,
+            "inventory_IT": 2485.009,
+            "inventory_FI_E3": 16592.0,
+            "inventory_FI_C3": 16592.0
+        },
+        {
+            "week": 44,
+            "inventory_OH": 606.0,
+            "inventory_IT": 1783.0,
+            "inventory_FI_E3": 13263.0,
+            "inventory_FI_C3": 13263.0
+        },
+        {
+            "week": 45,
+            "inventory_OH": 431.0,
+            "inventory_IT": 1783.0,
+            "inventory_FI_E3": 9934.0,
+            "inventory_FI_C3": 9934.0
+        },
+        {
+            "week": 46,
+            "inventory_OH": 255.0,
+            "inventory_IT": 1783.0,
+            "inventory_FI_E3": 6605.0,
+            "inventory_FI_C3": 6605.0
+        },
+        {
+            "week": 47,
+            "inventory_OH": 80.0,
+            "inventory_IT": 1783.0,
+            "inventory_FI_E3": 27804.0,
+            "inventory_FI_C3": 27804.0
+        },
+        {
+            "week": 48,
+            "inventory_OH": 0.0,
+            "inventory_IT": 0.0,
+            "inventory_FI_E3": 0.0,
+            "inventory_FI_C3": 0.0
+        },
+        {
+            "week": 49,
+            "inventory_OH": 0.0,
+            "inventory_IT": 0.0,
+            "inventory_FI_E3": 0.0,
+            "inventory_FI_C3": 0.0
+        },
+        {
+            "week": 50,
+            "inventory_OH": 0.0,
+            "inventory_IT": 0.0,
+            "inventory_FI_E3": 0.0,
+            "inventory_FI_C3": 0.0
+        },
+        {
+            "week": 51,
+            "inventory_OH": 0.0,
+            "inventory_IT": 0.0,
+            "inventory_FI_E3": 0.0,
+            "inventory_FI_C3": 0.0
+        }
+    ]
+}

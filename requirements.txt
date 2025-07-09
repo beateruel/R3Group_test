@@ -1,0 +1,15 @@
+streamlit
+skforecast
+xgboost
+pandas
+numpy
+matplotlib
+plotly
+seaborn
+simpy
+openpyxl
+xlrd
+kaleido
+pyvis
+networkx
+statsmodels

@@ -1,0 +1,27 @@
+ {
+        "description": "Comparison of different supply chain scenarios. Each entry represents the percentage variation of key performance indicators (KPIs) when moving from the first scenario to the second.",
+        "calculation_formula": "(second_scenario - first_scenario) / first_scenario",
+        "data_types": {
+            "demand_variation": "float (percentage change in demand)",
+            "init_shortage": "float (initial shortage variation in percentage)",
+            "end_shortage": "float (final shortage variation in percentage)",
+            "total_costs_euros": "float (percentage change in total costs in euros)",
+            "total_income_euros": "float (percentage change in total income in euros)",
+            "total_profit_euros": "float (percentage change in total profit in euros)",
+            "total_logistic_costs_euros": "float (percentage change in total logistics costs in euros)",
+            "total_production_costs_euros": "float (percentage change in total production costs in euros)",
+            "total_distribution_costs_euros": "float (percentage change in total distribution costs in euros)",
+            "total_purchasing_costs_euros": "float (percentage change in total purchasing costs in euros)",
+            "total_ordering_costs_euros": "float (percentage change in total ordering costs in euros)",
+            "total_holding_costs_euros": "float (percentage change in total holding costs in euros)",
+            "total_emissions(kgCO2e)": "float (percentage change in total emissions in kgCO2e)",
+            "total_distribution_emissions(kgCO2e)": "float (percentage change in total distribution emissions in kgCO2e)",
+            "production_capacity_utilization(%)": "float (percentage change in production capacity utilization)",
+            "downtime_rate(%)": "float (percentage change in downtime rate)",
+            "setup_time(%)": "float (percentage change in setup time)",
+            "OTIF(%)": "float (percentage change in On-Time In-Full rate)",
+            "stockouts(%)": "float (percentage change in stockouts)",
+            "out_of_time(%)": "float (percentage change in out-of-time deliveries)",
+            "not_in_full(%)": "float (percentage change in incomplete deliveries)"
+        }
+}

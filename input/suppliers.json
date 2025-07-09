@@ -1,0 +1,48 @@
+{"Suppliers":
+     [
+         {
+            "SupplierId": "1",
+             "MaterialId":"1",
+             "MaterialDisplayName": "PBT",
+             "SupplierName": "Biesterfeld",
+             "SupplierLocation": "Dupon",
+             "SupplierDistanceUnitOfMeasure": "km",
+             "SupplierDistance": 1893,
+             "SupplierPriceUnitOfMeasure": "€",
+             "SupplierMinPrice": 7.46,
+             "SupplierMaxPrice": 8.2,
+             "ReorderWeightUnitOfMeasure": "kg",
+             "ReorderQuantity": 1783,
+             "SupplierTimeUnitOfMeasure": "w",
+             "ReorderPoint": 12,
+             "SupplierLeadTime": 12,
+             "SupplierDeliveryQuantity":0,
+             "SupplierDeliveryTime":4,
+             "SupplierDeliverMode": "ROAD",
+             "SupplierSafetyStock":500
+            },
+         {
+                            "SupplierId": "2",
+                            "MaterialId": "2",
+                            "MaterialDisplayName": "TPE",
+                            "SupplierName": "Salmon",
+                            "SupplierLocation": "Kraiburg",
+                            "SupplierDistanceUnitOfMeasure": "km",
+                            "SupplierDistance": 2439,
+                            "SupplierPriceUnitOfMeasure": "€",
+                            "SupplierMinPrice": 5.8,
+                            "SupplierMaxPrice": 6.4,
+                            "ReorderWeightUnitOfMeasure": "kg",
+                            "ReorderQuantity": 700,
+                            "SupplierTimeUnitOfMeasure": "w",
+                            "ReorderPoint": 16,
+                            "SupplierLeadTime": 4,
+                            "SupplierDeliveryQuantity":175,
+                            "SupplierDeliveryTime":4,
+                            "SupplierSafetyStock":100,
+                            "SupplierDeliverMode": "ROAD"
+
+                        }
+                    ]
+                    
+}

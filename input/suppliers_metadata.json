@@ -1,0 +1,131 @@
+{
+    "metadata": {
+        "description": "This JSON file contains supplier data, including pricing, lead times, reorder points, and delivery details.",
+        "columns": {
+            "SupplierId": {
+                "type": "string",
+                "description": "Unique identifier for the supplier."
+            },
+            "MaterialId": {
+                "type": "string",
+                "description": "Unique identifier for the material supplied."
+            },
+            "MaterialDisplayName": {
+                "type": "string",
+                "description": "The common name of the material."
+            },
+            "SupplierName": {
+                "type": "string",
+                "description": "Name of the supplier company."
+            },
+            "SupplierLocation": {
+                "type": "string",
+                "description": "Location of the supplier."
+            },
+            "SupplierDistanceUnitOfMeasure": {
+                "type": "string",
+                "description": "Unit of measurement for supplier distance (e.g., km)."
+            },
+            "SupplierDistance": {
+                "type": "integer",
+                "description": "Distance from supplier to destination in km."
+            },
+            "SupplierPriceUnitOfMeasure": {
+                "type": "string",
+                "description": "Currency for supplier pricing (e.g., €)."
+            },
+            "SupplierMinPrice": {
+                "type": "float",
+                "description": "Minimum price per unit of material in €."
+            },
+            "SupplierMaxPrice": {
+                "type": "float",
+                "description": "Maximum price per unit of material in €."
+            },
+            "ReorderWeightUnitOfMeasure": {
+                "type": "string",
+                "description": "Unit of measurement for reorder quantity (e.g., kg)."
+            },
+            "ReorderQuantity": {
+                "type": "integer",
+                "description": "Quantity of material to reorder in kg."
+            },
+            "SupplierTimeUnitOfMeasure": {
+                "type": "string",
+                "description": "Unit of measurement for lead time (e.g., weeks)."
+            },
+            "ReorderPoint": {
+                "type": "integer",
+                "description": "Inventory level that triggers a reorder."
+            },
+            "SupplierLeadTime": {
+                "type": "integer",
+                "description": "Lead time for supplier deliveries in weeks."
+            },
+            "SupplierDeliveryQuantity": {
+                "type": "integer",
+                "description": "Number of units delivered per shipment."
+            },
+            "SupplierDeliveryTime": {
+                "type": "integer",
+                "description": "Time required for supplier deliveries in weeks."
+            },
+            "SupplierDeliverMode": {
+                "type": "string",
+                "description": "Mode of transportation used for deliveries (e.g., ROAD)."
+            },
+            "SupplierSafetyStock": {
+                "type": "integer",
+                "description": "Minimum safety stock level maintained."
+            }
+        },
+        "source": "Generated from supplier database",
+        "last_updated": "2025-02-06"
+    },
+    "data": {
+        "Suppliers": [
+            {
+                "SupplierId": "1",
+                "MaterialId": "1",
+                "MaterialDisplayName": "PBT",
+                "SupplierName": "Biesterfeld",
+                "SupplierLocation": "Dupon",
+                "SupplierDistanceUnitOfMeasure": "km",
+                "SupplierDistance": 1893,
+                "SupplierPriceUnitOfMeasure": "€",
+                "SupplierMinPrice": 7.46,
+                "SupplierMaxPrice": 8.2,
+                "ReorderWeightUnitOfMeasure": "kg",
+                "ReorderQuantity": 1783,
+                "SupplierTimeUnitOfMeasure": "w",
+                "ReorderPoint": 12,
+                "SupplierLeadTime": 12,
+                "SupplierDeliveryQuantity": 0,
+                "SupplierDeliveryTime": 4,
+                "SupplierDeliverMode": "ROAD",
+                "SupplierSafetyStock": 500
+            },
+            {
+                "SupplierId": "2",
+                "MaterialId": "2",
+                "MaterialDisplayName": "TPE",
+                "SupplierName": "Salmon",
+                "SupplierLocation": "Kraiburg",
+                "SupplierDistanceUnitOfMeasure": "km",
+                "SupplierDistance": 2439,
+                "SupplierPriceUnitOfMeasure": "€",
+                "SupplierMinPrice": 5.8,
+                "SupplierMaxPrice": 6.4,
+                "ReorderWeightUnitOfMeasure": "kg",
+                "ReorderQuantity": 700,
+                "SupplierTimeUnitOfMeasure": "w",
+                "ReorderPoint": 16,
+                "SupplierLeadTime": 4,
+                "SupplierDeliveryQuantity": 175,
+                "SupplierDeliveryTime": 4,
+                "SupplierSafetyStock": 100,
+                "SupplierDeliverMode": "ROAD"
+            }
+        ]
+    }
+}

@@ -1,0 +1,23 @@
+{
+    "metadata": {
+        "description": "This JSON file contains the main simulation parameters, including demand variations, shortages, and price variations.",
+        "columns": {
+            "SimulationName": {"type": "string", "description": "Name of the simulation scenario."},
+            "DemandVariation": {"type": "float", "description": "Percentage variation in demand."},
+            "InitWeekShortage": {"type": "integer", "description": "Initial week shortage indicator."},
+            "EndWeekShortage": {"type": "integer", "description": "End week shortage indicator."},
+            "PriceVariation": {"type": "float", "description": "Percentage variation in price."}
+        },
+        "source": "Generated from simulation model",
+        "last_updated": "2025-02-06"
+    },
+    "data": {
+        "main": {
+            "SimulationName": "REMOVE2",
+            "DemandVariation": -0.3,
+            "InitWeekShortage": -1,
+            "EndWeekShortage": -1,
+            "PriceVariation": 0
+        }
+    }
+}

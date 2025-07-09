@@ -1,0 +1,129 @@
+{
+    "metadata": {
+        "description": "This JSON file contains the Bill of Materials (BOM) for different products, specifying materials, production parameters, and costs.",
+        "columns": {
+            "ProductId": {"type": "string", "description": "Unique identifier for the product."},
+            "ProductName": {"type": "string", "description": "Name of the product."},
+            "Enabled": {"type": "boolean", "description": "Indicates whether the BOM is active."},
+            "Description": {"type": "string", "description": "Description of the Bill of Materials (BOM)."},
+            "BillOfMaterialClassName": {"type": "string", "description": "Category or type of BOM."},
+            "WeightUnitOfMeasure": {"type": "string", "description": "Unit of measurement for weight (e.g., g)."},
+            "TotalWeight": {"type": "float", "description": "Total weight of the product in grams."},
+            "CycleTimeUnitMeasure": {"type": "string", "description": "Unit of measurement for cycle time (e.g., s)."},
+            "CycleTime": {"type": "integer", "description": "Time required for one production cycle in seconds."},
+            "ProductionRateUnitMeasure": {"type": "string", "description": "Unit of measurement for production rate."},
+            "ProductionRate": {"type": "integer", "description": "Number of units produced per cycle."},
+            "ScrapPercentage": {"type": "float", "description": "Percentage of material wasted in production."},
+            "SetupTime": {"type": "integer", "description": "Time required for machine setup in minutes."},
+            "SetupCost": {"type": "float", "description": "Cost incurred for machine setup per unit in euros."},
+            "ProductionCost": {"type": "float", "description": "Cost of production per unit in euros."},
+            "QualityCheckTime": {"type": "integer", "description": "Time required for quality checks in minutes."},
+            "BatchSize": {"type": "integer", "description": "Number of units produced in a batch."},
+            "SafetyStock": {"type": "integer", "description": "Minimum safety stock level maintained."},
+            "Materials": {"type": "array", "description": "List of materials used in the product."},
+            "MaterialId": {"type": "string", "description": "Unique identifier for the material."},
+            "MaterialDisplayName": {"type": "string", "description": "Common name of the material."},
+            "MaterialName": {"type": "string", "description": "Full name of the material."},
+            "MaterialWeightUnitOfMeasure": {"type": "string", "description": "Unit of measurement for material weight (e.g., g)."},
+            "MaterialTotalWeight": {"type": "float", "description": "Total weight of the material used per product."},
+            "MaterialScrapPercentage": {"type": "float", "description": "Percentage of the material wasted in production."},
+            "MaterialOilPercentage": {"type": "float", "description": "Percentage of oil content in the material."},
+            "DensityUnitOfMeasure": {"type": "string", "description": "Unit of measurement for material density (e.g., g/cm3)."},
+            "Density": {"type": "float", "description": "Density of the material."},
+            "DocumentationUrl": {"type": "string", "description": "URL to the material documentation."}
+        },
+        "source": "Generated from product manufacturing system",
+        "last_updated": "2025-02-06"
+    },
+       "data": {
+                "BillOfMaterialList": [
+                    {
+                        "ProductId": "1",
+                        "ProductName": "E3",
+                        "Enabled": true,
+                        "Description": "Bill of Material for E3 - non rubber",
+                        "BillOfMaterialClassName": "Production",
+                        "WeightUnitOfMeasure": "g",
+                        "TotalWeight": 3.15,
+                        "CycleTimeUnitMeasure": "s",
+                        "CycleTime": 22,
+                        "ProductionRateUnitMeasure": "units/cycle",
+                        "ProductionRate": 8,
+                        "ScrapPercentage": 3,
+                        "_clarification1": "setup time and quality check in minutes",
+                        "SetupTime": 60,
+                        "SetupCost": 100,
+                        "ProductionCost":0.3,
+                         "_clarification2": "setup cost and production cost per unit and in € ",
+                        "QualityCheckTime":0,
+                        "BatchSize": 24528,
+                        "SafetyStock":5000,
+                        "Materials": [
+                            {
+                                "MaterialId": "1",
+                                "MaterialDisplayName": "PBT",
+                                "MaterialName": "Crastin FR684NH1",
+                                "MaterialWeightUnitOfMeasure": "g",
+                                "MaterialTotalWeight": 3.15,
+                                "MaterialScrapPercentage": 0,
+                                "MaterialOilPercentage": 0.75,
+                                "DensityUnitOfMeasure": "g/cm3",
+                                "Density": 0.115,
+                                "DocumentationUrl": "https://www.interowa.com/website/file/crastin-fr684nh-nc010.pdf"
+                            }
+                        ]
+                    },
+                    
+                    {
+                        "ProductId": "2",
+                        "ProductName": "C3",
+                        "Enabled": true,
+                        "Description": "Bill of Material for C3 - with rubber",
+                        "BillOfMaterialClassName": "Production",
+                        "WeightUnitOfMeasure": "g",
+                        "TotalWeight": 3.65,
+                        "CycleTimeUnitMeasure": "s",
+                        "CycleTime": 30,
+                        "ProductionRateUnitMeasure": "units/cycle",
+                        "ProductionRate": 8,
+                        "ScrapPercentage": 3,
+                        "_clarification1": "setup time and quiality check in minutes",
+                        "SetupTime": 60,
+                        "SetupCost": 100,
+                        "ProductionCost":0.3,
+                         "_clarification2": "setup cost and production cost per unit and in € ",
+                        "QualityCheckTime":0,
+                        "BatchSize": 24528,
+                        "SafetyStock":5000,
+                        "Materials": [
+                            {
+                                "MaterialId": "1",
+                                "MaterialDisplayName": "PBT",
+                                "MaterialName": "Crastin FR684NH1",
+                                "MaterialWeightUnitOfMeasure": "g",
+                                "MaterialTotalWeight": 3.15,
+                                "MaterialScrapPercentage": 0,
+                                "MaterialOilPercentage": 0.75,
+                                "DensityUnitOfMeasure": "g/cm3",
+                                "Density": 0.115,
+                                "DocumentationUrl": "https://www.interowa.com/website/file/crastin-fr684nh-nc010.pdf"
+                            },
+                              {
+                                "MaterialId": "2",
+                                "MaterialDisplayName": "TPE",
+                                "MaterialName": "",
+                                "MaterialWeightUnitOfMeasure": "g",
+                                "MaterialTotalWeight": 0.5,
+                                "MaterialScrapPercentage": 0,
+                                "MaterialOilPercentage": 1,
+                                "DensityUnitOfMeasure": "g/cm3",
+                                "Density": 1.15,
+                                "DocumentationUrl": "https://www.yumpu.com/es/document/read/10070325/thermolast-k-kraiburg-tpe"
+                                
+                            }
+                            
+                        ]
+                    }
+                ]
+            }
+}
