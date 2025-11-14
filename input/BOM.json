@@ -1,0 +1,91 @@
+{
+    "BillOfMaterialList": [
+        {
+            "ProductId": "1",
+            "ProductName": "E3",
+            "Enabled": true,
+            "Description": "Bill of Material for E3 - non rubber",
+            "BillOfMaterialClassName": "Production",
+            "WeightUnitOfMeasure": "g",
+            "TotalWeight": 3.15,
+            "CycleTimeUnitMeasure": "s",
+            "CycleTime": 22,
+            "ProductionRateUnitMeasure": "units/cycle",
+            "ProductionRate": 8,
+            "ScrapPercentage": 3,
+            "_clarification1": "setup time and quality check in minutes",
+            "SetupTime": 60,
+            "SetupCost": 100,
+            "ProductionCost":0.3,
+             "_clarification2": "setup cost and production cost per unit and in € ",
+            "QualityCheckTime":0,
+            "BatchSize": 30000,
+            "SafetyStock":5000,
+            "Materials": [
+                {
+                    "MaterialId": "1",
+                    "MaterialDisplayName": "PBT",
+                    "MaterialName": "Crastin FR684NH1",
+                    "MaterialWeightUnitOfMeasure": "g",
+                    "MaterialTotalWeight": 3.15,
+                    "MaterialScrapPercentage": 0,
+                    "MaterialOilPercentage": 0.75,
+                    "DensityUnitOfMeasure": "g/cm3",
+                    "Density": 0.115,
+                    "DocumentationUrl": "https://www.interowa.com/website/file/crastin-fr684nh-nc010.pdf"
+                }
+            ]
+        },
+        
+        {
+            "ProductId": "2",
+            "ProductName": "C3",
+            "Enabled": true,
+            "Description": "Bill of Material for C3 - with rubber",
+            "BillOfMaterialClassName": "Production",
+            "WeightUnitOfMeasure": "g",
+            "TotalWeight": 3.65,
+            "CycleTimeUnitMeasure": "s",
+            "CycleTime": 30,
+            "ProductionRateUnitMeasure": "units/cycle",
+            "ProductionRate": 8,
+            "ScrapPercentage": 3,
+            "_clarification1": "setup time and quiality check in minutes",
+            "SetupTime": 60,
+            "SetupCost": 100,
+            "ProductionCost":0.3,
+             "_clarification2": "setup cost and production cost per unit and in € ",
+            "QualityCheckTime":0,
+            "BatchSize": 30000,
+            "SafetyStock":5000,
+            "Materials": [
+                {
+                    "MaterialId": "1",
+                    "MaterialDisplayName": "PBT",
+                    "MaterialName": "Crastin FR684NH1",
+                    "MaterialWeightUnitOfMeasure": "g",
+                    "MaterialTotalWeight": 3.15,
+                    "MaterialScrapPercentage": 0,
+                    "MaterialOilPercentage": 0.75,
+                    "DensityUnitOfMeasure": "g/cm3",
+                    "Density": 0.115,
+                    "DocumentationUrl": "https://www.interowa.com/website/file/crastin-fr684nh-nc010.pdf"
+                },
+                  {
+                    "MaterialId": "2",
+                    "MaterialDisplayName": "TPE",
+                    "MaterialName": "",
+                    "MaterialWeightUnitOfMeasure": "g",
+                    "MaterialTotalWeight": 0.5,
+                    "MaterialScrapPercentage": 0,
+                    "MaterialOilPercentage": 1,
+                    "DensityUnitOfMeasure": "g/cm3",
+                    "Density": 1.15,
+                    "DocumentationUrl": "https://www.yumpu.com/es/document/read/10070325/thermolast-k-kraiburg-tpe"
+                    
+                }
+                
+            ]
+        }
+    ]
+}

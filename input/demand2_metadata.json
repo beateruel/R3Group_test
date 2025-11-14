@@ -1,0 +1,310 @@
+{
+    "metadata": {
+        "description": "This JSON file contains the monthly demand forecast for different products, including quantity variations over time.",
+        "columns": {
+            "month": {
+                "type": "integer",
+                "description": "Month number in the planning period."
+            },
+            "Items": {
+                "type": "array",
+                "description": "List of products with demand details for the given month."
+            },
+            "ProductId": {
+                "type": "string",
+                "description": "Unique identifier for the product."
+            },
+            "ProductName": {
+                "type": "string",
+                "description": "Name of the product."
+            },
+            "QuantiyUnitOfMeasure": {
+                "type": "string",
+                "description": "Unit of measurement for the demand quantity."
+            },
+            "Quantity": {
+                "type": "integer",
+                "description": "Number of units required for the product in the given month."
+            }
+        },
+        "source": "Generated from demand planning simulation",
+        "last_updated": "2024-01-01"
+    },
+    "data": {
+        "demand": [
+            {
+                "month": 1,
+                "Items": [
+                    {
+                        "ProductId": "1",
+                        "ProductName": "E3",
+                        "QuantiyUnitOfMeasure": "number",
+                        "Quantity": 63330
+                    },
+                    {
+                        "ProductId": "2",
+                        "ProductName": "C3",
+                        "QuantiyUnitOfMeasure": "number",
+                        "Quantity": 63330
+                    }
+                ]
+            },
+            {
+                "month": 2,
+                "Items": [
+                    {
+                        "ProductId": "1",
+                        "ProductName": "E3",
+                        "QuantiyUnitOfMeasure": "number",
+                        "Quantity": 97020
+                    },
+                    {
+                        "ProductId": "2",
+                        "ProductName": "C3",
+                        "QuantiyUnitOfMeasure": "number",
+                        "Quantity": 97020
+                    }
+                
+                ]
+            },
+            
+            {
+                "month": 3,
+                "Items": [
+                    {
+                        "ProductId": "1",
+                        "ProductName": "E3",
+                        "QuantiyUnitOfMeasure": "number",
+                        "Quantity": 109940
+                    },
+                    {
+                        "ProductId": "2",
+                        "ProductName": "C3",
+                        "QuantiyUnitOfMeasure": "number",
+                        "Quantity": 109940
+                    }
+                
+                ]
+            },
+            
+             {
+                "month": 4,
+                "Items": [
+                    {
+                        "ProductId": "1",
+                        "ProductName": "E3",
+                        "QuantiyUnitOfMeasure": "number",
+                        "Quantity": 83180
+                    },
+                    {
+                        "ProductId": "2",
+                        "ProductName": "C3",
+                        "QuantiyUnitOfMeasure": "number",
+                        "Quantity": 83180
+                    }
+                
+                ]
+            },
+             {
+                "month": 5,
+                "Items": [
+                    {
+                        "ProductId": "1",
+                        "ProductName": "E3",
+                        "QuantiyUnitOfMeasure": "number",
+                        "Quantity": 99680
+                    },
+                    {
+                        "ProductId": "2",
+                        "ProductName": "C3",
+                        "QuantiyUnitOfMeasure": "number",
+                        "Quantity": 99680
+                    }
+                
+                ]
+            },
+            {
+                "month": 6,
+                "Items": [
+                    {
+                        "ProductId": "1",
+                        "ProductName": "E3",
+                        "QuantiyUnitOfMeasure": "number",
+                        "Quantity": 106120
+                    },
+                    {
+                        "ProductId": "2",
+                        "ProductName": "C3",
+                        "QuantiyUnitOfMeasure": "number",
+                        "Quantity": 106120
+                    }
+                
+                ]
+            },
+            
+            {
+                "month": 7,
+                "Items": [
+                    {
+                        "ProductId": "1",
+                        "ProductName": "E3",
+                        "QuantiyUnitOfMeasure": "number",
+                        "Quantity": 112950
+                    },
+                    {
+                        "ProductId": "2",
+                        "ProductName": "C3",
+                        "QuantiyUnitOfMeasure": "number",
+                        "Quantity": 112950
+                    }
+                
+                ]
+            },
+               {
+                "month": 8,
+                "Items": [
+                    {
+                        "ProductId": "1",
+                        "ProductName": "E3",
+                        "QuantiyUnitOfMeasure": "number",
+                        "Quantity": 75540
+                    },
+                    {
+                        "ProductId": "2",
+                        "ProductName": "C3",
+                        "QuantiyUnitOfMeasure": "number",
+                        "Quantity": 75540
+                    }
+                
+                ]
+            },
+             {
+                "month": 9,
+                "Items": [
+                    {
+                        "ProductId": "1",
+                        "ProductName": "E3",
+                        "QuantiyUnitOfMeasure": "number",
+                        "Quantity": 121090
+                    },
+                    {
+                        "ProductId": "2",
+                        "ProductName": "C3",
+                        "QuantiyUnitOfMeasure": "number",
+                        "Quantity": 121090
+                    }
+                
+                ]
+            },
+            {
+                "month": 10,
+                "Items": [
+                    {
+                        "ProductId": "1",
+                        "ProductName": "E3",
+                        "QuantiyUnitOfMeasure": "number",
+                        "Quantity": 134940
+                    },
+                    {
+                        "ProductId": "2",
+                        "ProductName": "C3",
+                        "QuantiyUnitOfMeasure": "number",
+                        "Quantity": 134940
+                    }
+                
+                ]
+            },
+             {
+                "month": 11,
+                "Items": [
+                    {
+                        "ProductId": "1",
+                        "ProductName": "E3",
+                        "QuantiyUnitOfMeasure": "number",
+                        "Quantity": 132440
+                    },
+                    {
+                        "ProductId": "2",
+                        "ProductName": "C3",
+                        "QuantiyUnitOfMeasure": "number",
+                        "Quantity": 132440
+                    }
+                
+                ]
+            },
+            {
+                "month": 12,
+                "Items": [
+                    {
+                        "ProductId": "1",
+                        "ProductName": "E3",
+                        "QuantiyUnitOfMeasure": "number",
+                        "Quantity": 111430
+                    },
+                    {
+                        "ProductId": "2",
+                        "ProductName": "C3",
+                        "QuantiyUnitOfMeasure": "number",
+                        "Quantity": 111430
+                    }
+                
+                ]
+            },
+             {
+                "month": 13,
+                "Items": [
+                    {
+                        "ProductId": "1",
+                        "ProductName": "E3",
+                        "QuantiyUnitOfMeasure": "number",
+                        "Quantity": 111430
+                    },
+                    {
+                        "ProductId": "2",
+                        "ProductName": "C3",
+                        "QuantiyUnitOfMeasure": "number",
+                        "Quantity": 111430
+                    }
+                
+                ]
+            },
+             {
+                "month": 14,
+                "Items": [
+                    {
+                        "ProductId": "1",
+                        "ProductName": "E3",
+                        "QuantiyUnitOfMeasure": "number",
+                        "Quantity": 111430
+                    },
+                    {
+                        "ProductId": "2",
+                        "ProductName": "C3",
+                        "QuantiyUnitOfMeasure": "number",
+                        "Quantity": 111430
+                    }
+                
+                ]
+            },
+             {
+                "month": 15,
+                "Items": [
+                    {
+                        "ProductId": "1",
+                        "ProductName": "E3",
+                        "QuantiyUnitOfMeasure": "number",
+                        "Quantity": 111430
+                    },
+                    {
+                        "ProductId": "2",
+                        "ProductName": "C3",
+                        "QuantiyUnitOfMeasure": "number",
+                        "Quantity": 111430
+                    }
+                
+                ]
+            }
+            
+        ]
+    }
+}

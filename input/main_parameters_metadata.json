@@ -1,0 +1,25 @@
+{
+    "metadata": {
+        "description": "This JSON file contains the main simulation parameters, including demand variations, shortages, and price variations.",
+        "columns": {
+            "SimulationName": {"type": "string", "description": "Name of the simulation scenario."},
+            "DemandVariation": {"type": "float", "description": "Percentage variation in demand."},
+            "InitWeekShortage": {"type": "integer", "description": "Initial week shortage indicator."},
+            "EndWeekShortage": {"type": "integer", "description": "End week shortage indicator."},
+            "BatchSize": {"type": "integer", "description": "Production lot size before a new setup."},
+            "ReorderQuantity": {"type": "integer", "description": "Reorder quantity assumes the minimum order quantity and it is recalculated based on expected demand."}
+        },
+        "source": "Generated from simulation model",
+        "last_updated": "2025-09-09"
+    },
+    "data": {
+        "main": {
+            "SimulationName": "REMOVE2",
+            "DemandVariation": -0.3,
+            "InitWeekShortage": -1,
+            "EndWeekShortage": -1,
+            "BatchSize":30000, 
+            "ReorderQuantity":1783
+        }
+    }
+}

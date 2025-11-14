@@ -1,0 +1,6 @@
+
+git init                      # Si el repositorio no está inicializado
+git add .                    # Añade todos los archivos excepto los ignorados
+git commit -m "Subir todos los cambios ignorando archivos grandes"
+#git remote add origin <URL-del-repo>  # Si no está configurado aún
+git push -u origin main      # O la rama que estés usando
