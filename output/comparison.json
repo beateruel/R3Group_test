@@ -1,0 +1,25 @@
+{
+    "CONVENTIONAL_STRESS_TEST_vs_OPTIMAL_STRESS_TEST": {
+        "demand_variation": 0,
+        "init_shortage": -0.0,
+        "end_shortage": -0.0,
+        "total_costs_euros": 2.1919792619701126,
+        "total_income_euros": 0.0,
+        "total_profit_euros": -2.4288248711666807,
+        "total_logistic_costs_euros": 3.1753944607394184,
+        "total_production_costs_euros": 0.339135205226672,
+        "total_distribution_costs_euros": 0.0,
+        "total_purchasing_costs_euros": 3.442684766214178,
+        "total_ordering_costs_euros": 0.0,
+        "total_holding_costs_euros": 0.0,
+        "total_emissions(kgCO2e)": 0.0,
+        "total_distribution_emissions(kgCO2e)": 0.0,
+        "production_capacity_utilization(%)": 0.0,
+        "downtime_rate(%)": 0,
+        "setup_time(%)": 0.0,
+        "OTIF(%)": 0.0,
+        "stockouts(%)": 0,
+        "out_of_time(%)": 0.0,
+        "not_in_full(%)": 0
+    }
+}

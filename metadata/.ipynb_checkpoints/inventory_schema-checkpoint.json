@@ -1,0 +1,25 @@
+ {
+        "description": "This JSON file contains weekly inventory levels for GLN plast.",
+        "columns": {
+            "week": {
+                "type": "integer",
+                "description": "Week number in the planning period."
+            },
+            "inventory_OH": {
+                "type": "number",
+                "description": "On-hand inventory at the end of the week (kg)."
+            },
+            "inventory_IT": {
+                "type": "number",
+                "description": "Inventory in transit from the supplier to the destination (kg)."
+            },
+            "inventory_FI_E3": {
+                "type": "number",
+                "description": "Finished inventory at location E3 (number of units)."
+            },
+            "inventory_FI_C3": {
+                "type": "number",
+                "description": "Finished inventory at location C3 (number of units)."
+            }
+        }
+}

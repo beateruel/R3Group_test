@@ -12,8 +12,3 @@ venv/
 .vscode/
 .DS_Store
 Thumbs.db
-temp/
-
-# Output / metadata
-output/
-metadata/
