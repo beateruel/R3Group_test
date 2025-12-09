@@ -3,10 +3,10 @@
 import numpy as np
 import pandas as pd
 import os
-from datetime import timedelta
+#from datetime import timedelta
 
 import matplotlib.pyplot as plt
-import plotly.graph_objects as go
+#import plotly.graph_objects as go
 import plotly.io as pio
 import plotly.offline as poff
 pio.templates.default = "seaborn"
@@ -16,8 +16,8 @@ plt.style.use('seaborn-v0_8-darkgrid')
 import warnings
 warnings.simplefilter("ignore")
 
-from sklearn.model_selection import train_test_split
-from sklearn.model_selection import GridSearchCV
+#from sklearn.model_selection import train_test_split
+#from sklearn.model_selection import GridSearchCV
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor  
 from sklearn.preprocessing import StandardScaler
@@ -25,7 +25,7 @@ from sklearn.preprocessing import StandardScaler
 
 #import lightgbm as lgb
 
-from skforecast.recursive import ForecasterRecursive
+#from skforecast.recursive import ForecasterRecursive
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
