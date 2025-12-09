@@ -21,7 +21,7 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor  
 from sklearn.preprocessing import StandardScaler
-from tkinter import *
+#from tkinter import *
 
 #import lightgbm as lgb
 
