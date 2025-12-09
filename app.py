@@ -231,11 +231,11 @@ The forecasted values are derived via simple linear regression from the last 12 
             """)
 
     # Mostrar logs si existen
-    #if 'stdout' in st.session_state or 'stderr' in st.session_state:
-        #st.divider()
-        #st.subheader("Generator logs")
-        #st.code(st.session_state.get('stdout', ''), language="text")
-        #st.code(st.session_state.get('stderr', ''), language="text")
+    if 'stdout' in st.session_state or 'stderr' in st.session_state:
+        st.divider()
+        st.subheader("Generator logs")
+        st.code(st.session_state.get('stdout', ''), language="text")
+        st.code(st.session_state.get('stderr', ''), language="text")
 
 
 # --- Simulation Page ---
