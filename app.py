@@ -81,102 +81,162 @@ with tabs[1]:
     # 🔹 Input Section
     st.subheader("Input parameters")
     input_col, help_col = st.columns([2, 1])
-    raw_material_prices_path = None
-    main_material_prices_path = None
+
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    OUTPUT_DIR = os.path.join(BASE_DIR, "output")
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     with input_col:
-        raw_material_prices_file = st.file_uploader(
-            "Upload raw material prices (CSV)", 
+        raw_material_file = st.file_uploader(
+            "Upload raw material prices (CSV)",
             type="csv",
             help="CSV file with crude oil historical prices. Columns: Date, Price."
         )
-
-        main_material_prices_file = st.file_uploader(
-            "Upload supplier material prices (CSV)", 
+        main_material_file = st.file_uploader(
+            "Upload supplier material prices (CSV)",
             type="csv",
             help="CSV file with supplier-specific supplier material prices. Columns: Date, Price."
         )
 
         if st.button("Start prediction"):
-            if raw_material_prices_file:
-                raw_material_prices_path = os.path.join(BASE_DIR, raw_material_prices_file.name)
-                with open(raw_material_prices_path, "wb") as f:
-                    f.write(raw_material_prices_file.getbuffer())
-                st.success(f"Raw material prices saved to {raw_material_prices_path}")
+            # Persistimos en session_state
+            st.session_state['run_id'] = __import__('time').strftime("%Y%m%d_%H%M%S")
+            st.session_state['raw_path'] = None
+            st.session_state['main_path'] = None
 
-            if main_material_prices_file:
-                main_material_prices_path = os.path.join(BASE_DIR, main_material_prices_file.name)
-                with open(main_material_prices_path, "wb") as f:
-                    f.write(main_material_prices_file.getbuffer())
-                st.success(f"Supplier material prices saved to {main_material_prices_path}")
+            # Guardar los CSV en BASE_DIR
+            if raw_material_file:
+                raw_path = os.path.join(BASE_DIR, raw_material_file.name)
+                with open(raw_path, "wb") as f:
+                    f.write(raw_material_file.getbuffer())
+                st.session_state['raw_path'] = raw_path
+                st.success(f"Raw material prices saved to {raw_path}")
 
-            if raw_material_prices_path and main_material_prices_path:
-                result = subprocess.run(
-                    [sys.executable, os.path.join(BASE_DIR, "GRAL_forecasting_v1.1.py"),
-                     raw_material_prices_path, main_material_prices_path],
-                    capture_output=True,
-                    text=True
-                )
-                
-                st.info("Prediction process launched. See results below.")
+            if main_material_file:
+                main_path = os.path.join(BASE_DIR, main_material_file.name)
+                with open(main_path, "wb") as f:
+                    f.write(main_material_file.getbuffer())
+                st.session_state['main_path'] = main_path
+                st.success(f"Supplier material prices saved to {main_path}")
+
+            # Ejecutar el generador SOLO si tenemos ambos CSV
+            if st.session_state['raw_path'] and st.session_state['main_path']:
+                # Registrar tiempos de modificación previos (si existen)
+                raw_png = os.path.join(OUTPUT_DIR, "raw_material_prices.png")
+                pred_png = os.path.join(OUTPUT_DIR, "predictions.png")
+                prev_raw_mtime = os.path.getmtime(raw_png) if os.path.exists(raw_png) else 0
+                prev_pred_mtime = os.path.getmtime(pred_png) if os.path.exists(pred_png) else 0
+
+                try:
+                    result = subprocess.run(
+                        [
+                            sys.executable,
+                            os.path.join(BASE_DIR, "GRAL_forecasting_v1.1.py"),
+                            st.session_state['raw_path'],
+                            st.session_state['main_path']
+                        ],
+                        cwd=BASE_DIR,            # 🔒 asegura rutas relativas del script
+                        capture_output=True,
+                        text=True,
+                        check=True               # 🔒 lanza excepción si returncode != 0
+                    )
+                    st.info("Prediction process launched. See results below.")
+                    st.session_state['stdout'] = result.stdout
+                    st.session_state['stderr'] = result.stderr
+
+                    # Validar que los PNG se han actualizado
+                    ok_raw = os.path.exists(raw_png) and os.path.getmtime(raw_png) > prev_raw_mtime
+                    ok_pred = os.path.exists(pred_png) and os.path.getmtime(pred_png) > prev_pred_mtime
+
+                    if not (ok_raw and ok_pred):
+                        st.warning("The generator ran but output images did not update. Check logs below.")
+
+                except subprocess.CalledProcessError as e:
+                    st.error("Prediction script failed.")
+                    st.code(e.stdout or "", language="text")
+                    st.code(e.stderr or "", language="text")
 
     with help_col:
         with st.expander("ℹ️ What files should I upload?"):
             st.markdown("""
-            - **Raw material prices** → CSV with crude oil time series.  
-            - **Supplier material prices** → CSV with supplier supplier material historical prices.  
+- **Raw material prices** → CSV with crude oil time series.
+- **Supplier material prices** → CSV with supplier-specific material historical prices.
 
-            The model uses **XGBoost** for forecasting raw material prices (Stage 1), 
-            and then predicts **supplier material prices** based on the last 12 forecasted values (Stage 2).
+The model uses **XGBoost** for forecasting raw material prices (Stage 1),
+then predicts **supplier material prices** from the last 12 forecasted values (Stage 2).
             """)
 
     st.divider()
 
     # 🔹 Results Section
     st.subheader("Forecast Results")
-    result_tabs = st.tabs(["📈 Raw material forecast", "📉 supplier material price forecast"])
+    result_tabs = st.tabs(["📈 Raw material forecast", "📉 Supplier material price forecast"])
+
+    def show_image_bytes(path: str, caption: str):
+        if os.path.exists(path):
+            with open(path, "rb") as f:
+                st.image(f.read(), caption=caption)
+        else:
+            st.info(f"Not found: {path}")
 
     with result_tabs[0]:
-        if(raw_material_prices_path==None):
-            output_file=None
-        else:
-            output_file = os.path.join(BASE_DIR, "output", "raw_material_prices.png")
-            if os.path.exists(output_file):
-                st.image(output_file, caption="Historical and forecasted raw material prices")
-                with open('output/scores.pickle', 'rb') as handle:
-                        resultsDict = pickle.load(handle)
-                        mape_error = {resultsDict['XGBoost']['mape']}
-                        mape_interpretation = interpret_mape(mape_error)
-                with st.expander("ℹ️ Explanation"):
-                    st.markdown("""
-                    This graph shows the last 12 **raw material price forecast** generated using XGBoost.  
-                    They will be used to project supplier material prices.              
-                    """)
-                    st.write(mape_interpretation)
-                    st.markdown("""
-                        Additionally, it is advisable to evaluate the context and other complementary metrics (e.g., RMSE, MAE) before making decisions.
-                    """)
+        raw_png = os.path.join(OUTPUT_DIR, "raw_material_prices.png")
+        show_image_bytes(raw_png, "Historical and forecasted raw material prices")
+
+        # scores.pickle robusto
+        pkl_path = os.path.join(OUTPUT_DIR, 'scores.pickle')
+        if os.path.exists(pkl_path):
+            try:
+                with open(pkl_path, 'rb') as handle:
+                    resultsDict = pickle.load(handle)
+                # ⚠️ usar una única clave consistente
+                mape_key = 'XGBoost' if 'XGBoost' in resultsDict else ('xgb' if 'xgb' in resultsDict else None)
+                if mape_key:
+                    mape_error = {resultsDict[mape_key]['mape']}
+                    interpret_mape(mape_error)
+                else:
+                    st.warning("MAPE key not found in scores.pickle")
+            except Exception as ex:
+                st.warning(f"Could not read scores.pickle: {ex}")
+
+        with st.expander("ℹ️ Explanation"):
+            st.markdown("""
+This graph shows the last 12 **raw material price forecast** generated using XGBoost.
+They will be used to project supplier material prices.
+            """)
 
     with result_tabs[1]:
-        if(raw_material_prices_path==None):
-            output_file=None
-        else:
-            output_file = os.path.join(BASE_DIR, "output", "predictions.png")
-            if os.path.exists(output_file):
-                st.image(output_file, caption="Predicted supplier material prices vs raw material forecast")
-                with open('output/scores.pickle', 'rb') as handle:
-                        resultsDict = pickle.load(handle)
-                        mape_error = {resultsDict['xgb']['mape']}
-                        mape_interpretation = interpret_mape(mape_error)
-                with st.expander("ℹ️ Explanation"):
-                    st.markdown("""
-                    This graph compares **supplier-specific supplier material prices** against the **predicted supplier material prices**.The forecasted values
-                    are derived via simple linear regression from the last 12 forecasted raw material values using XGBoost.  
-                    """)
-                    st.write(mape_interpretation)
-                    st.markdown("""
-                        Additionally, it is advisable to evaluate the context and other complementary metrics (e.g., RMSE, MAE) before making decisions.
-                    """)
+        pred_png = os.path.join(OUTPUT_DIR, "predictions.png")
+        show_image_bytes(pred_png, "Predicted supplier material prices vs raw material forecast")
+
+        # Reutilizamos el mismo pkl y clave consistente
+        pkl_path = os.path.join(OUTPUT_DIR, 'scores.pickle')
+        if os.path.exists(pkl_path):
+            try:
+                with open(pkl_path, 'rb') as handle:
+                    resultsDict = pickle.load(handle)
+                mape_key = 'XGBoost' if 'XGBoost' in resultsDict else ('xgb' if 'xgb' in resultsDict else None)
+                if mape_key:
+                    mape_error = {resultsDict[mape_key]['mape']}
+                    interpret_mape(mape_error)
+                else:
+                    st.warning("MAPE key not found in scores.pickle")
+            except Exception as ex:
+                st.warning(f"Could not read scores.pickle: {ex}")
+
+        with st.expander("ℹ️ Explanation"):
+            st.markdown("""
+This graph compares **supplier-specific material prices** against the **predicted supplier material prices**.
+The forecasted values are derived via simple linear regression from the last 12 XGBoost raw material forecasts.
+            """)
+
+    # Mostrar logs si existen
+    #if 'stdout' in st.session_state or 'stderr' in st.session_state:
+        #st.divider()
+        #st.subheader("Generator logs")
+        #st.code(st.session_state.get('stdout', ''), language="text")
+        #st.code(st.session_state.get('stderr', ''), language="text")
+
 
 # --- Simulation Page ---
 with tabs[2]:
