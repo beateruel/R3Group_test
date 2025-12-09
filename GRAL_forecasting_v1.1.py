@@ -1,5 +1,5 @@
 #libraries
-from lightgbm.plotting import _determine_direction_for_categorical_split
+#from lightgbm.plotting import _determine_direction_for_categorical_split
 import numpy as np
 import pandas as pd
 import os
@@ -23,7 +23,7 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import StandardScaler
 from tkinter import *
 
-import lightgbm as lgb
+#import lightgbm as lgb
 
 from skforecast.recursive import ForecasterRecursive
 
@@ -32,7 +32,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestRegressor
 from xgboost import XGBRegressor
-from lightgbm import LGBMRegressor
+#from lightgbm import LGBMRegressor
 import pandas as pd
 import numpy as np
 from utils.metrics import evaluate
