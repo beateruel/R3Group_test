@@ -9,6 +9,17 @@ from lib import GLN_IO as gl
 import GLN_optimization as gopt
 import GLN_simulation_1 as gsimu
 import pickle
+import io
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+from datetime import datetime
+import base64
+from utils.scdt_Report import create_filled_report, save_to_json
+#from reportlab.lib.utils import ImageReader
+from dataclasses import dataclass, asdict
+from aas.aas_client import AASClient
+
+
 
 def interpret_mape(mape_in):
     
@@ -205,6 +216,7 @@ This graph shows the last 12 **raw material price forecast** generated using XGB
 They will be used to project supplier material prices.
             """)
 
+
     with result_tabs[1]:
         pred_png = os.path.join(OUTPUT_DIR, "predictions.png")
         show_image_bytes(pred_png, "Predicted supplier material prices vs raw material forecast")
@@ -236,7 +248,138 @@ The forecasted values are derived via simple linear regression from the last 12 
         st.subheader("Generator logs")
         st.code(st.session_state.get('stdout', ''), language="text")
         st.code(st.session_state.get('stderr', ''), language="text")
+    
+    st.subheader("📄 Export PDF Report")   
+    # Solo habilitar si tenemos resultados
+    if 'scores.pickle' in os.listdir(OUTPUT_DIR):
 
+        # Obtener MAPE
+        try:
+            with open(os.path.join(OUTPUT_DIR, 'scores.pickle'), 'rb') as handle:
+                resultsDict = pickle.load(handle)
+            mape_key = 'XGBoost' if 'XGBoost' in resultsDict else ('xgb' if 'xgb' in resultsDict else None)
+            if mape_key:
+                mape_value = resultsDict[mape_key]['mape'] * 100  # porcentaje
+            else:
+                mape_value = None
+        except Exception:
+            mape_value = None
+
+        # Generate PDF when clicking the button
+    if st.button("📄 Generate PDF Report"):
+        pdf_buffer = io.BytesIO()
+        c = canvas.Canvas(pdf_buffer, pagesize=letter)
+        width, height = letter
+
+        # --- Title ---
+        c.setFont("Helvetica-Bold", 20)
+        c.drawString(50, height - 50, "Forecast Report")
+
+        # --- Timestams ---
+        c.setFont("Helvetica", 12)
+        creation_date = datetime.now().strftime("%Y-%m-%d %H:%M")
+        c.drawString(50, height - 70, f"Created on: {creation_date}")
+
+        # --- MAPE ---
+        c.setFont("Helvetica", 14)
+        if mape_value is not None:
+            c.drawString(50, height - 90, f"MAPE: {mape_value:.2f}%")
+        else:
+            c.drawString(50, height - 90, "MAPE: N/A")
+
+        # --- Uploadaded info ---
+        c.setFont("Helvetica-Bold", 14)
+        c.drawString(50, height - 120, "Uploaded Files:")
+        c.setFont("Helvetica", 12)
+        raw_name = st.session_state.get('raw_path', 'N/A')
+        main_name = st.session_state.get('main_path', 'N/A')
+        c.drawString(70, height - 140, f"Raw material CSV: {os.path.basename(raw_name)}")
+        c.drawString(70, height - 160, f"Supplier material CSV: {os.path.basename(main_name)}")
+
+        # --- Grpahs ---
+        chart_files = ["raw_material_prices.png", "predictions.png"]
+        chart_y = height - 200
+        for chart in chart_files:
+            chart_path = os.path.join(OUTPUT_DIR, chart)
+            if os.path.exists(chart_path):
+                c.drawImage(chart_path, 50, chart_y - 200, width=400, height=200)
+                chart_y -= 220
+
+        # --- Notes / markdowns ---
+        c.showPage()
+        c.setFont("Helvetica-Bold", 16)
+        c.drawString(50, height - 50, "Notes / Comments")
+        c.setFont("Helvetica", 12)
+        notes = """
+            - Forecasts generated using XGBoost model for raw material prices.
+            - Supplier material forecasts are projected using linear regression from last 12 raw forecasts.
+            - MAPE interpretation:
+                - <10% → Excellent accuracy
+                - 10-20% → Good accuracy
+                - 20-50% → Acceptable accuracy
+                - >50% → Poor accuracy
+            - Use this report to support procurement planning and scenario simulations.
+            """
+        text_object = c.beginText(50, height - 80)
+        for line in notes.split("\n"):
+            text_object.textLine(line)
+        c.drawText(text_object)
+
+        c.save()
+        pdf_buffer.seek(0)
+
+        # Convert to base64 blob
+        pdf_bytes = pdf_buffer.read()
+        pdf_blob = base64.b64encode(pdf_bytes).decode('utf-8')
+
+        # Create the structured report object
+        scdt_Report = create_filled_report(
+            strType="Simulation",
+            strTitle="Forecast Report",
+            strAnalysis="Generated report including uploaded files, charts, and notes.",
+            pdfBlob=pdf_blob
+        )
+
+        st.success("Report object successfully created!")
+        
+        #this can be removed
+        reportPath = "temp/report_output.json"
+        save_to_json(scdt_Report, reportPath)
+        print(f"JSON report successfully generated : {reportPath}")
+
+        # Prepare the data to upload the AAS on the server
+        reportID = scdt_Report.idShort
+        report_json = json.dumps(asdict(scdt_Report))
+        
+
+        # Initialise the AAS client and then authenticate
+        # Please adapt the Server adress, client_id and client_secret
+        client = AASClient(
+            base_url="https://aas.amlaval.fr",
+            client_id="admin",
+            client_secret="admin"
+        )
+        token_info = client.authenticate()
+        print("token:",token_info)
+
+        # Put the submodel Element on the AAS server
+        # AAS = SCDT_Reports_AAS
+        # submodel = Reports
+        # submodel Element = {reportID} with generated GUID
+        result = client.update_submodel_element_value(
+            aas_id_short="SCDTReports_AAS",
+            sm_id_short="Reports",
+            se_id_short_path=reportID,
+            value=report_json
+        )
+        print("final result:",result)
+
+        st.download_button(
+            label="Download PDF",
+            data=pdf_buffer,
+            file_name="forecast_report.pdf",
+            mime="application/pdf"
+        )
 
 # --- Simulation Page ---
 with tabs[2]:
@@ -416,8 +559,6 @@ with tabs[2]:
                 👉 The bar chart directly compares **AS-IS vs Stress Test**.
                 """)
 
-
-        # --- Optimization  Page ---
 with tabs[3]:
   
     st.header("Scenario Simulation Optimization")    
@@ -583,10 +724,7 @@ with tabs[3]:
                 👉 Pie chart is shown only if all values are positive.  
                 👉 If there are negatives, a bar chart is used (green = positive, red = negative).  
                 👉 The bar chart directly compares **Conventional Stress Test vs Optimal Stress Test (Bar chart)**.
-                """)
-
-                   
-    
+                """)  
          
     
 
