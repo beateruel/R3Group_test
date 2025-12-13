@@ -1,0 +1,9 @@
+base_url: "https://aas.amlaval.fr/"
+client_id: "admin"
+client_secret:  "admin"
+
+aas:
+  id_short: "SCDTReports_AAS"
+
+submodel:
+  id_short: "Reports"
