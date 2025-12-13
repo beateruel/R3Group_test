@@ -9,16 +9,307 @@ from lib import GLN_IO as gl
 import GLN_optimization as gopt
 import GLN_simulation_1 as gsimu
 import pickle
-import io
+
 from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter
+from reportlab.lib.pagesizes import A4
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, PageBreak, Table, TableStyle
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.enums import TA_LEFT
+from reportlab.lib.units import cm
+from reportlab.lib import colors
+from io import BytesIO
+from PIL import Image as PILImage
+import os
+
+
 from datetime import datetime
 import base64
 from utils.scdt_Report import create_filled_report, save_to_json
 #from reportlab.lib.utils import ImageReader
 from dataclasses import dataclass, asdict
 from aas.aas_client import AASClient
+from dataclasses import dataclass, asdict
+from typing import List, Optional
+import yaml
+from pathlib import Path
 
+#-------------------------------------for the report generation and submission to the AAS-----------------
+def load_config(path: str = "config.yaml") -> dict:
+    """Carga el archivo config.yaml y devuelve un diccionario."""
+    config_path = Path(path)
+    if not config_path.exists():
+        raise FileNotFoundError(f"No se encontró el archivo {path}")
+
+    with open(config_path, "r") as f:
+        config = yaml.safe_load(f)
+
+    return config
+
+@dataclass
+class AASConfig:
+    base_url:str
+    client_id: str
+    client_secret: str
+    aas_id_short: str = "SCDTReports_AAS"
+    submodel_id_short: str = "Reports"
+
+def _draw_multiline_text(c: canvas.Canvas, x: int, y: int, text: str, leading: int = 14, max_width: int = 520):
+    """
+    render text  (\n).
+    """
+    text_obj = c.beginText(x, y)
+    text_obj.setLeading(leading)
+    for line in text.split("\n"):
+        text_obj.textLine(line)
+    c.drawText(text_obj)
+
+def _scale_to_width(img_path, max_width, max_height):
+    # calculate the size to fit the content in the space
+    with PILImage.open(img_path) as im:
+        w, h = im.size
+    ratio = min(max_width / w, max_height / h)
+    return (w * ratio, h * ratio)
+
+def build_pdf(title, notes, image_paths, header_data):
+    """
+    title: str
+    notes: str (
+    image_paths: list[str]
+    header_data: dict (title/type/date/parameters)
+    """
+    buf = BytesIO()
+
+    # Márgenes y doc
+    PAGE_SIZE = A4
+    margin = 2*cm
+    doc = SimpleDocTemplate(
+        buf,
+        pagesize=PAGE_SIZE,
+        leftMargin=margin, rightMargin=margin,
+        topMargin=2.2*cm, bottomMargin=1.8*cm
+    )
+
+    styles = getSampleStyleSheet()
+    styles.add(ParagraphStyle(
+        name="TitleH1",
+        parent=styles["Heading1"],
+        fontSize=18,
+        leading=22,
+        spaceAfter=10
+    ))
+    styles.add(ParagraphStyle(
+        name="Meta",
+        parent=styles["Normal"],
+        fontSize=9,
+        textColor=colors.grey,
+        leading=12,
+        spaceAfter=6
+    ))
+    styles.add(ParagraphStyle(
+        name="Body",
+        parent=styles["Normal"],
+        fontSize=10.5,
+        leading=14
+    ))
+    styles.add(ParagraphStyle(
+        name="SectionTitle",
+        parent=styles["Heading2"],
+        fontSize=14,
+        leading=18,
+        spaceBefore=12, spaceAfter=6
+    ))
+
+    story = []
+
+    # --- Portada / encabezado visible en página 1 ---
+    story.append(Paragraph(header_data.get("title", title), styles["TitleH1"]))
+    meta_line = f"{header_data.get('type','')} — {header_data.get('date', datetime.now().strftime('%Y-%m-%d %H:%M'))}"
+    story.append(Paragraph(meta_line, styles["Meta"]))
+
+    # Parámetros en tabla (si hay)
+    params = header_data.get("parameters", {}) or {}
+    if params:
+        data = [["Parementer", "Value"]] + [[str(k), str(v)] for k, v in params.items()]
+        tbl = Table(data, colWidths=[6*cm, None])
+        tbl.setStyle(TableStyle([
+            ("BACKGROUND", (0,0), (-1,0), colors.HexColor("#F0F0F0")),
+            ("TEXTCOLOR", (0,0), (-1,0), colors.black),
+            ("FONTNAME", (0,0), (-1,0), "Helvetica-Bold"),
+            ("ALIGN", (0,0), (-1,0), "LEFT"),
+            ("GRID", (0,0), (-1,-1), 0.25, colors.grey),
+            ("ROWBACKGROUNDS", (0,1), (-1,-1), [colors.white, colors.HexColor("#FBFBFB")]),
+            ("LEFTPADDING", (0,0), (-1,-1), 6),
+            ("RIGHTPADDING", (0,0), (-1,-1), 6),
+            ("TOPPADDING", (0,0), (-1,-1), 4),
+            ("BOTTOMPADDING", (0,0), (-1,-1), 4),
+        ]))
+        story.append(tbl)
+        story.append(Spacer(1, 0.4*cm))
+
+    # --- Gráficos ---
+    story.append(Paragraph("Graphs from simulation", styles["SectionTitle"]))
+    usable_w = PAGE_SIZE[0] - doc.leftMargin - doc.rightMargin
+    usable_h = PAGE_SIZE[1] - doc.topMargin - doc.bottomMargin - 1*cm  # margen de seguridad
+
+    for p in image_paths or []:
+        if p and os.path.exists(p):
+            iw, ih = _scale_to_width(p, usable_w, usable_h)
+            img = Image(p, width=iw, height=ih)
+            img.hAlign = "CENTER"
+            story.append(img)
+            story.append(Spacer(1, 0.3*cm))
+        else:
+            story.append(Paragraph(f"[Aviso] Image not founded: {p}", styles["Meta"]))
+
+    # Salto antes de notas
+    story.append(PageBreak())
+
+    # --- Notas / comentarios (flujo multi-página) ---
+    story.append(Paragraph("Comments", styles["SectionTitle"]))
+    # Puedes dividir en párrafos por líneas en blanco para mejor justificado
+    for para in (notes or "").split("\n\n"):
+        story.append(Paragraph(para.strip(), styles["Body"]))
+        story.append(Spacer(1, 0.2*cm))
+
+    # --- Header/Footer en todas las páginas ---
+    def _header_footer(canvas, doc_):
+        canvas.saveState()
+        # Header
+        header_txt = header_data.get("title", title)
+        canvas.setFont("Helvetica", 9)
+        canvas.setFillColor(colors.grey)
+        canvas.drawString(doc_.leftMargin, PAGE_SIZE[1] - 1.2*cm, header_txt[:90])
+        # Footer
+        footer_txt = f"Generated: {header_data.get('date', datetime.now().strftime('%Y-%m-%d %H:%M'))}"
+        canvas.drawRightString(PAGE_SIZE[0] - doc_.rightMargin, 1.0*cm, f"{footer_txt}  ·  Page {doc_.page}")
+        canvas.restoreState()
+
+    doc.build(story, onFirstPage=_header_footer, onLaterPages=_header_footer)
+    pdf_bytes = buf.getvalue()
+    buf.close()
+    return pdf_bytes 
+
+
+# def build_pdf(
+#     title: str,
+#     subtitle_lines: List[str],
+#     image_paths: List[str],
+#     notes: Optional[str] = None,
+#     input_values: Optional[str] = None,         
+#     small_kpi_images: Optional[List[str]] = None, 
+#     extra_section: Optional[str] = None           
+# ) -> bytes:
+#     """
+#     Crea un PDF en memoria con título, subtítulo (líneas), imágenes (si existen) y notas.
+#     Devuelve bytes del PDF.
+#     """
+#     buf = io.BytesIO()
+#     c = canvas.Canvas(buf, pagesize=letter)
+#     width, height = letter
+
+#     # Portada
+#     c.setFont("Helvetica-Bold", 20)
+#     c.drawString(50, height - 60, title)
+
+#     c.setFont("Helvetica", 12)
+#     y = height - 85
+#     for line in subtitle_lines:
+#         c.drawString(50, y, line)
+#         y -= 16
+
+#     # Imágenes (máximo dos por página)
+#     x_img, w_img, h_img, y_start, y_gap = 50, 500, 230, y - 20, 20
+#     current_y = y_start
+#     items_in_page = 0
+
+#     for p in image_paths:
+#         if os.path.exists(p):
+#             if items_in_page == 2:
+#                 c.showPage()
+#                 c.setFont("Helvetica-Bold", 16)
+#                 c.drawString(50, height - 50, "Charts")
+#                 current_y = height - 90
+#                 items_in_page = 0
+#             c.drawImage(p, x_img, current_y - h_img, width=w_img, height=h_img, preserveAspectRatio=True, anchor='n')
+#             current_y -= (h_img + y_gap)
+#             items_in_page += 1
+
+#     # Notas
+#     if notes:
+#         c.showPage()
+#         c.setFont("Helvetica-Bold", 16)
+#         c.drawString(50, height - 50, "Notes / Comments")
+#         c.setFont("Helvetica", 12)
+#         _draw_multiline_text(c, 50, height - 80, notes, leading=14)
+
+#     c.save()
+#     buf.seek(0)
+#     return buf.read()
+
+def save_fig(fig, path):
+    fig.tight_layout()
+    fig.savefig(path, dpi=150, bbox_inches="tight")
+    plt.close(fig)
+
+def save_small_kpi_plot(fig, path):
+    fig.set_size_inches(1.18, 1.57)  # 3x4 cm
+    fig.savefig(path, dpi=150, bbox_inches="tight")
+    plt.close(fig)
+
+def create_and_optionally_store_report(
+    strType: str,
+    strTitle: str,
+    strAnalysis: str,
+    pdf_bytes: bytes,
+    save_json_locally: bool,
+    json_path: str,
+    upload_to_aas: bool,
+    aas_cfg: Optional[AASConfig] = None,
+):
+    """
+    Build the pdf as blob Base64, 
+    save JSON ig requested and upload to the AAS if requested
+    """
+    pdf_blob = base64.b64encode(pdf_bytes).decode("utf-8")
+
+    scdt_Report = create_filled_report(
+        strType=strType,
+        strTitle=strTitle,
+        strAnalysis=strAnalysis,
+        pdfBlob=pdf_blob
+    )
+
+    if save_json_locally:
+        os.makedirs(os.path.dirname(json_path), exist_ok=True)
+        save_to_json(scdt_Report, json_path)
+
+    if upload_to_aas:
+        if aas_cfg is None:
+            raise ValueError("AASConfig mandatory si upload_to_aas=True.")
+
+        reportID = scdt_Report.idShort
+        report_json = json.dumps(asdict(scdt_Report))
+
+        client = AASClient(
+            base_url=aas_cfg.base_url,
+            client_id=aas_cfg.client_id,
+            client_secret=aas_cfg.client_secret
+        )
+        token_info = client.authenticate()
+        # Puedes loguear condicionalmente:
+        # st.write("Token obtenido:", token_info)
+
+        result = client.update_submodel_element_value(
+            aas_id_short=aas_cfg.aas_id_short,
+            sm_id_short=aas_cfg.submodel_id_short,
+            se_id_short_path=reportID,
+            value=report_json
+        )
+        # st.write("Resultado AAS:", result)
+
+    return scdt_Report
+
+#-------------------------------manage the error in forecasting---------------------------------
 
 
 def interpret_mape(mape_in):
@@ -49,7 +340,7 @@ def check_serializability(obj):
     except TypeError:
         return False
 
-# --- Página principal con tabs ---
+# ---main page with tabs---
 df_products_material = gl.read_products_BOM()
 batch_size_init = int(df_products_material["BatchSize"].values[0])
 df_materials_suppliers = gl.read_material_suppliers()
@@ -57,6 +348,15 @@ df_supplier_material = df_materials_suppliers[(df_materials_suppliers["SupplierI
 reorder_quantity_init = int(df_supplier_material["ReorderQuantity"].iloc[0])   
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 st.set_page_config(layout="wide", page_title="R3Group Supply Chain Proof of Concept")
+config = load_config()
+
+#-----------config AAS-----------
+  #config server AAS
+aas_url = config["base_url"]
+aas_client = config["client_id"]
+aas_secret = client_secret = config["client_secret"]
+aas_id_short = "SCDTReports_AAS"
+aas_sm_id_short = "Reports"
 
 st.markdown(
     """
@@ -66,8 +366,6 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-
-
 
 # --- Menú superior tipo tabs ---
 tabs = st.tabs(["🏠 Home","Prediction", "📊 Simulation", "⚙️ Optimization"])
@@ -85,7 +383,8 @@ with tabs[0]:
     """)
     st.divider()
 
-# --- Prediction Page ---
+     
+ # ====================== PREDICTION TAB ======================
 with tabs[1]:
     st.title("Price Prediction")
 
@@ -178,7 +477,6 @@ then predicts **supplier material prices** from the last 12 forecasted values (S
             """)
 
     st.divider()
-
     # 🔹 Results Section
     st.subheader("Forecast Results")
     result_tabs = st.tabs(["📈 Raw material forecast", "📉 Supplier material price forecast"])
@@ -216,12 +514,10 @@ This graph shows the last 12 **raw material price forecast** generated using XGB
 They will be used to project supplier material prices.
             """)
 
-
     with result_tabs[1]:
         pred_png = os.path.join(OUTPUT_DIR, "predictions.png")
         show_image_bytes(pred_png, "Predicted supplier material prices vs raw material forecast")
 
-        # Reutilizamos el mismo pkl y clave consistente
         pkl_path = os.path.join(OUTPUT_DIR, 'scores.pickle')
         if os.path.exists(pkl_path):
             try:
@@ -242,15 +538,14 @@ This graph compares **supplier-specific material prices** against the **predicte
 The forecasted values are derived via simple linear regression from the last 12 XGBoost raw material forecasts.
             """)
 
-    # Mostrar logs si existen
+    # show logs
     if 'stdout' in st.session_state or 'stderr' in st.session_state:
         st.divider()
         st.subheader("Generator logs")
         st.code(st.session_state.get('stdout', ''), language="text")
         st.code(st.session_state.get('stderr', ''), language="text")
-    
-    st.subheader("📄 Export PDF Report")   
-    # Solo habilitar si tenemos resultados
+        
+    # enable if we have results
     if 'scores.pickle' in os.listdir(OUTPUT_DIR):
 
         # Obtener MAPE
@@ -265,121 +560,102 @@ The forecasted values are derived via simple linear regression from the last 12 
         except Exception:
             mape_value = None
 
-        # Generate PDF when clicking the button
-    if st.button("📄 Generate PDF Report"):
-        pdf_buffer = io.BytesIO()
-        c = canvas.Canvas(pdf_buffer, pagesize=letter)
-        width, height = letter
+        
+    # ====================== FORECASTING REPORT ======================
+    st.subheader("📄 Export Forecast Report")
 
-        # --- Title ---
-        c.setFont("Helvetica-Bold", 20)
-        c.drawString(50, height - 50, "Forecast Report")
+    # Inputs del usuario (requerimiento #3)
+    rpt_type_fore = "Forecasting"
+    rpt_title_fore = st.text_input("Report title (strTitle)", value="Forecast Report")
+    rpt_comments_fore = st.text_area("Comments", value="Generated report including uploaded files, charts, and notes.")
 
-        # --- Timestams ---
-        c.setFont("Helvetica", 12)
+    # Opciones
+    #save_json_fore = st.checkbox("Save JSON locally", value=False, key="save_json_fore")
+    #upload_aas_fore = st.checkbox("Upload to AAS Server", value=True, key="upload_json_fore")
+  
+       
+    if st.button("📄 Generate Forecast PDF"):
         creation_date = datetime.now().strftime("%Y-%m-%d %H:%M")
-        c.drawString(50, height - 70, f"Created on: {creation_date}")
 
-        # --- MAPE ---
-        c.setFont("Helvetica", 14)
-        if mape_value is not None:
-            c.drawString(50, height - 90, f"MAPE: {mape_value:.2f}%")
-        else:
-            c.drawString(50, height - 90, "MAPE: N/A")
+        # --- MAPE  ---
+        mape_str = "N/A"
+        mape_model = "N/A"
+        try:
+            scores_path = os.path.join(OUTPUT_DIR, 'scores.pickle')
+            if os.path.exists(scores_path):
+                with open(scores_path, 'rb') as handle:
+                    resultsDict = pickle.load(handle)
+                mape_key = 'XGBoost' if 'XGBoost' in resultsDict else ('xgb' if 'xgb' in resultsDict else None)
+                if mape_key and 'mape' in resultsDict[mape_key]:
+                    mape_value = float(resultsDict[mape_key]['mape']) * 100
+                    mape_str = f"{mape_value:.2f}%"
+                    mape_model = mape_key
+        except Exception:           
+            pass
 
-        # --- Uploadaded info ---
-        c.setFont("Helvetica-Bold", 14)
-        c.drawString(50, height - 120, "Uploaded Files:")
-        c.setFont("Helvetica", 12)
-        raw_name = st.session_state.get('raw_path', 'N/A')
-        main_name = st.session_state.get('main_path', 'N/A')
-        c.drawString(70, height - 140, f"Raw material CSV: {os.path.basename(raw_name)}")
-        c.drawString(70, height - 160, f"Supplier material CSV: {os.path.basename(main_name)}")
+        # --- Files info (si no hay, N/A) ---
+        raw_file = os.path.basename(st.session_state.get('raw_path', 'N/A'))
+        supp_file = os.path.basename(st.session_state.get('main_path', 'N/A'))
 
-        # --- Grpahs ---
-        chart_files = ["raw_material_prices.png", "predictions.png"]
-        chart_y = height - 200
-        for chart in chart_files:
-            chart_path = os.path.join(OUTPUT_DIR, chart)
-            if os.path.exists(chart_path):
-                c.drawImage(chart_path, 50, chart_y - 200, width=400, height=200)
-                chart_y -= 220
+       # --- Header info (UNIFIED) ---
+        header_data = {
+            "title": rpt_title_fore,
+            "type": rpt_type_fore,  # "Forecasting"
+            "date": creation_date,
+            "parameters": {
+                "Model": mape_model,
+                "MAPE": mape_str,
+                "Raw material CSV": raw_file,
+                "Supplier material CSV": supp_file
+            }
+        }
 
-        # --- Notes / markdowns ---
-        c.showPage()
-        c.setFont("Helvetica-Bold", 16)
-        c.drawString(50, height - 50, "Notes / Comments")
-        c.setFont("Helvetica", 12)
-        notes = """
-            - Forecasts generated using XGBoost model for raw material prices.
-            - Supplier material forecasts are projected using linear regression from last 12 raw forecasts.
-            - MAPE interpretation:
-                - <10% → Excellent accuracy
-                - 10-20% → Good accuracy
-                - 20-50% → Acceptable accuracy
-                - >50% → Poor accuracy
-            - Use this report to support procurement planning and scenario simulations.
-            """
-        text_object = c.beginText(50, height - 80)
-        for line in notes.split("\n"):
-            text_object.textLine(line)
-        c.drawText(text_object)
 
-        c.save()
-        pdf_buffer.seek(0)
+        # --- Images from pipeline---
+        forecast_imgs = [
+            os.path.join(OUTPUT_DIR, "raw_material_prices.png"),
+            os.path.join(OUTPUT_DIR, "predictions.png"),
+        ]
 
-        # Convert to base64 blob
-        pdf_bytes = pdf_buffer.read()
-        pdf_blob = base64.b64encode(pdf_bytes).decode('utf-8')
-
-        # Create the structured report object
-        scdt_Report = create_filled_report(
-            strType="Simulation",
-            strTitle="Forecast Report",
-            strAnalysis="Generated report including uploaded files, charts, and notes.",
-            pdfBlob=pdf_blob
+        # 1) build PDF
+        pdf_bytes = build_pdf(
+            title=rpt_title_fore,
+            header_data=header_data,
+            image_paths=forecast_imgs,
+            notes=rpt_comments_fore
         )
 
-        st.success("Report object successfully created!")
-        
-        #this can be removed
-        reportPath = "temp/report_output.json"
-        save_to_json(scdt_Report, reportPath)
-        print(f"JSON report successfully generated : {reportPath}")
-
-        # Prepare the data to upload the AAS on the server
-        reportID = scdt_Report.idShort
-        report_json = json.dumps(asdict(scdt_Report))
-        
-
-        # Initialise the AAS client and then authenticate
-        # Please adapt the Server adress, client_id and client_secret
-        client = AASClient(
-            base_url="https://aas.amlaval.fr",
-            client_id="admin",
-            client_secret="admin"
+        # 2) Create object + JSON + (opcional) subir AAS
+        json_name = "output/report_forecast_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+       
+        aas_cfg = AASConfig(
+            base_url=aas_url,
+            client_id=aas_client,
+            client_secret=aas_secret,
+            aas_id_short=aas_id_short,
+            submodel_id_short=aas_sm_id_short
         )
-        token_info = client.authenticate()
-        print("token:",token_info)
 
-        # Put the submodel Element on the AAS server
-        # AAS = SCDT_Reports_AAS
-        # submodel = Reports
-        # submodel Element = {reportID} with generated GUID
-        result = client.update_submodel_element_value(
-            aas_id_short="SCDTReports_AAS",
-            sm_id_short="Reports",
-            se_id_short_path=reportID,
-            value=report_json
+        scdt_report = create_and_optionally_store_report(
+            strType=rpt_type_fore,
+            strTitle=rpt_title_fore,
+            strAnalysis=rpt_comments_fore,
+            pdf_bytes=pdf_bytes,
+            save_json_locally=True,
+            json_path=json_name,
+            upload_to_aas=True,
+            aas_cfg=aas_cfg
         )
-        print("final result:",result)
 
+        # 3) Download button
         st.download_button(
-            label="Download PDF",
-            data=pdf_buffer,
+            label="Download Forecast PDF",
+            data=pdf_bytes,
             file_name="forecast_report.pdf",
             mime="application/pdf"
         )
+        st.success("Forecast report generated successfully.")
+
 
 # --- Simulation Page ---
 with tabs[2]:
@@ -532,22 +808,28 @@ with tabs[2]:
             with kpi_tabs[0]:
                 
                 st.markdown("**AS-IS vs Stress Test (Bar chart)**")
-                fig, ax = plt.subplots()
+                fig1, ax = plt.subplots()
                 ax.bar(financial_kpis["KPI"], financial_kpis["Value"])
                 ax.set_ylabel("Value")
                 ax.set_title("Financial KPIs comparison")               
-                st.pyplot(fig)
+                st.pyplot(fig1)
+
+                fig1_path = os.path.join(OUTPUT_DIR, "financial_kpis.png")
+                save_fig(fig1, fig1_path)
 
             # --- Operational KPIs
             with kpi_tabs[1]:
                
                 st.markdown("**AS-IS vs Stress Test (Bar chart)**")
-                fig, ax = plt.subplots()
+                fig2, ax = plt.subplots()
                 ax.bar(operational_kpis["KPI"], operational_kpis["Value"])
                 ax.set_ylabel("Value")
                 ax.set_title("Operational KPIs comparison")
                 plt.xticks(rotation=45, ha="right")
-                st.pyplot(fig)
+                st.pyplot(fig2)
+
+                fig2_path = os.path.join(OUTPUT_DIR, "operational_kpis.png")
+                save_fig(fig2, fig2_path)
 
             with st.expander("ℹ️ KPI explanation"):
                 st.markdown("""
@@ -558,6 +840,100 @@ with tabs[2]:
                 👉 If there are negatives, a bar chart is used (green = positive, red = negative).  
                 👉 The bar chart directly compares **AS-IS vs Stress Test**.
                 """)
+
+     # ====================== Simulation REPORT ======================
+    st.subheader("📄 Export Simulation Report")
+
+    # Inputs shown in the report
+    sim_demand_variation = demand_var,
+    sim_start_week = start_week,
+    sim_end_week = end_week,
+    #sim_batch_size = batch_size,
+    #sim_reorder_qty = reorder_quantity
+
+    # Inputs from user
+    rpt_type_simu = "Simulation"
+    rpt_title_simu = st.text_input("Report title (strTitle)", value="Simulation Report")
+    rpt_comments_simu = st.text_area("Simulation notes", value="Generated report including uploaded files, charts, and notes.")
+
+    # User Options
+    #save_json_simu = st.checkbox("Save JSON locally", value=False, key="save_json_simu")
+    #upload_aas_simu = st.checkbox("Upload to AAS Server",value=True, key="upload_aas_simu")
+  
+    if st.button("📄 Generate Simulation PDF"):
+        try:
+            # ICON
+            icon_path = "assets/icon.png"
+
+            # Images for the PDF
+            simulation_imgs = [
+                os.path.join(OUTPUT_DIR, "AS_IS_individual.png"),
+                #os.path.join(OUTPUT_DIR, "AS_IS_combined.png"),
+                os.path.join(OUTPUT_DIR, "STRESS_TEST_individual.png"),
+                #os.path.join(OUTPUT_DIR, "STRESS_TEST_combined.png")
+                os.path.join(OUTPUT_DIR, "operational_kpis.png"),
+                os.path.join(OUTPUT_DIR, "financial_kpis.png")
+               
+            ]           
+
+           # Header info
+            header_data = {
+                "title": rpt_title_simu,
+                "type": rpt_type_simu,
+                "date": datetime.now().strftime("%Y-%m-%d %H:%M"),
+                "parameters": {
+                    "Demand Variation (percentage +/-[0-1]": sim_demand_variation,
+                    "Shortage Start Week": sim_start_week,
+                    "Shortage End Week": sim_end_week
+                    #"Batch Size": sim_batch_size,
+                    #"Reorder Quantity": sim_reorder_qty
+                }
+            }     
+
+                       
+            # 1) build PDF
+            pdf_bytes = build_pdf(
+                title=rpt_title_simu,
+                header_data=header_data,
+                image_paths=simulation_imgs,
+                notes=rpt_comments_simu
+            )
+
+            # 2) Create object + JSON + (opcional) subir AAS
+            json_name = "output/report_simulation_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+       
+            aas_cfg = AASConfig(
+                base_url=aas_url,
+                client_id=aas_client,
+                client_secret=aas_secret,
+                aas_id_short=aas_id_short,
+                submodel_id_short=aas_sm_id_short
+            )
+                   
+
+            scdt_report = create_and_optionally_store_report(
+                strType=rpt_type_simu,
+                strTitle=rpt_title_simu,
+                strAnalysis=rpt_comments_simu,
+                pdf_bytes=pdf_bytes,
+                save_json_locally=True,
+                json_path=json_name,
+                upload_to_aas=True,
+                aas_cfg=aas_cfg
+            )
+
+            #  3) Download button
+            st.download_button(
+                label="Download Simulation PDF",
+                data=pdf_bytes,
+                file_name="simulation_report.pdf",
+                mime="application/pdf"
+            )
+
+            st.success("PDF generated successfully!")
+
+        except Exception as e:
+            st.error(f"❌ Error generating the simulation PDF: {e}")
 
 with tabs[3]:
   
@@ -699,22 +1075,28 @@ with tabs[3]:
             with kpi_tabs[0]:
                 
                 st.markdown("**Conventional Stress Test vs Optimal Stress Test (Bar chart)**")
-                fig, ax = plt.subplots(figsize=(6, 4))
+                fig1, ax = plt.subplots(figsize=(6, 4))
                 ax.bar(financial_kpis["KPI"], financial_kpis["Value"])
                 ax.set_ylabel("Value")
                 ax.set_title("Financial KPIs comparison")
-                st.pyplot(fig)
+                st.pyplot(fig1)
+
+                fig1_path = os.path.join(OUTPUT_DIR, "financial_kpis_opt.png")
+                save_fig(fig1, fig1_path)
 
             # --- Operational KPIs
             with kpi_tabs[1]:
                
                 st.markdown("**Conventional Stress Test vs Optimal Stress Test (Bar chart)**")
-                fig, ax = plt.subplots(figsize=(6, 4))
+                fig2, ax = plt.subplots(figsize=(6, 4))
                 ax.bar(operational_kpis["KPI"], operational_kpis["Value"])
                 ax.set_ylabel("Value")
                 ax.set_title("Operational KPIs comparison")
                 plt.xticks(rotation=45, ha="right")
-                st.pyplot(fig)
+                st.pyplot(fig2)
+
+                fig2_path = os.path.join(OUTPUT_DIR, "operational_kpis_opt.png")
+                save_fig(fig2, fig2_path)
 
             with st.expander("ℹ️ KPI explanation"):
                 st.markdown("""
@@ -726,7 +1108,103 @@ with tabs[3]:
                 👉 The bar chart directly compares **Conventional Stress Test vs Optimal Stress Test (Bar chart)**.
                 """)  
          
-    
+      # ====================== Optimization REPORT ======================
+    st.subheader("📄 Export Optimization Report")
+
+    # Inputs shown in the report
+    opt_demand_variation = demand_var_opt
+    opt_EOQ_before =reorder_quantity_init
+    opt_EBQ_before =batch_size_init
+    opt_EOQ_after =EOQ
+    opt_EBQ_after =EBQ
+     
+
+    # Inputs from user
+    rpt_type_opt = "Optimization - Simulation"
+    rpt_title_opt = st.text_input("Report title (strTitle)", value="Optimization - Simulation Report")
+    rpt_comments_opt = st.text_area("Optimization - Simulation notes", value="Generated report including uploaded files, charts, and notes.")
+
+    # User Options
+    #save_json_simu = st.checkbox("Save JSON locally", value=False, key="save_json_simu")
+    #upload_aas_simu = st.checkbox("Upload to AAS Server",value=True, key="upload_aas_simu")
+  
+    if st.button("📄 Generate Optimization - Simulation PDF"):
+        try:
+            # ICON
+            icon_path = "assets/icon.png"
+
+
+            # Images for the PDF
+            optimization_imgs = [
+                os.path.join(OUTPUT_DIR, "CONVENTIONAL_STRESS_TEST_individual.png"),
+                #os.path.join(OUTPUT_DIR, "AS_IS_combined.png"),
+                os.path.join(OUTPUT_DIR, "OPTIMAL_STRESS_TEST_individual.png"),
+                #os.path.join(OUTPUT_DIR, "STRESS_TEST_combined.png")
+                os.path.join(OUTPUT_DIR, "operational_kpis_opt.png"),
+                os.path.join(OUTPUT_DIR, "financial_kpis_opt.png")
+               
+            ]           
+   
+
+           # Header info
+            header_data = {
+                "title": rpt_title_opt,
+                "type": rpt_type_opt,
+                "date": datetime.now().strftime("%Y-%m-%d %H:%M"),
+                "parameters": {
+                    "Demand Variation (percentage +/-[0-1]": sim_demand_variation,
+                    "EOQ before optimization (kg)": opt_EOQ_before,
+                    "EOQ after optimization (kg)": EOQ,
+                    "EBQ before optimization (pieces)": opt_EBQ_before,
+                    "EBQ after optimization (pieces)": EBQ
+                   
+                }
+            }     
+
+                       
+            # 1) build PDF
+            pdf_bytes = build_pdf(
+                title=rpt_title_opt,
+                header_data=header_data,
+                image_paths=optimization_imgs,
+                notes=rpt_comments_opt
+            )
+
+            # 2) Create object + JSON + (opcional) subir AAS
+            json_name = "output/report_optimization_simulation_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+       
+            aas_cfg = AASConfig(
+                base_url=aas_url,
+                client_id=aas_client,
+                client_secret=aas_secret,
+                aas_id_short=aas_id_short,
+                submodel_id_short=aas_sm_id_short
+            )
+                   
+
+            scdt_report = create_and_optionally_store_report(
+                strType=rpt_type_opt,
+                strTitle=rpt_title_opt,
+                strAnalysis=rpt_comments_opt,
+                pdf_bytes=pdf_bytes,
+                save_json_locally=True,
+                json_path=json_name,
+                upload_to_aas=True,
+                aas_cfg=aas_cfg
+            )
+
+            #  3) Download button
+            st.download_button(
+                label="Download Optimization Simulation PDF",
+                data=pdf_bytes,
+                file_name="optimization_simulation_report.pdf",
+                mime="application/pdf"
+            )
+
+            st.success("PDF generated successfully!")
+
+        except Exception as e:
+            st.error(f"❌ Error generating the optimization simulation PDF: {e}")
 
 
     st.markdown(
