@@ -451,8 +451,8 @@ with tabs[1]:
                         check=True               # 🔒 lanza excepción si returncode != 0
                     )
                     st.info("Prediction process launched. See results below.")
-                    st.session_state['stdout'] = result.stdout
-                    st.session_state['stderr'] = result.stderr
+                    #st.session_state['stdout'] = result.stdout
+                    #st.session_state['stderr'] = result.stderr
 
                     # Validar que los PNG se han actualizado
                     ok_raw = os.path.exists(raw_png) and os.path.getmtime(raw_png) > prev_raw_mtime
