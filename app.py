@@ -539,11 +539,11 @@ The forecasted values are derived via simple linear regression from the last 12 
             """)
 
     # show logs
-    if 'stdout' in st.session_state or 'stderr' in st.session_state:
-        st.divider()
-        st.subheader("Generator logs")
-        st.code(st.session_state.get('stdout', ''), language="text")
-        st.code(st.session_state.get('stderr', ''), language="text")
+   # if 'stdout' in st.session_state or 'stderr' in st.session_state:
+     #   st.divider()
+     #   st.subheader("Generator logs")
+     #   st.code(st.session_state.get('stdout', ''), language="text")
+     #   st.code(st.session_state.get('stderr', ''), language="text")
         
     # enable if we have results
     if 'scores.pickle' in os.listdir(OUTPUT_DIR):
