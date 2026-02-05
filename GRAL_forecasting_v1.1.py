@@ -1,12 +1,10 @@
-#libraries
-#from lightgbm.plotting import _determine_direction_for_categorical_split
+
 import numpy as np
 import pandas as pd
 import os
-#from datetime import timedelta
 
 import matplotlib.pyplot as plt
-#import plotly.graph_objects as go
+
 import plotly.io as pio
 import plotly.offline as poff
 pio.templates.default = "seaborn"
@@ -16,27 +14,29 @@ plt.style.use('seaborn-v0_8-darkgrid')
 import warnings
 warnings.simplefilter("ignore")
 
-#from sklearn.model_selection import train_test_split
-#from sklearn.model_selection import GridSearchCV
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor  
 from sklearn.preprocessing import StandardScaler
-#from tkinter import *
-
-#import lightgbm as lgb
-
-#from skforecast.recursive import ForecasterRecursive
-
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
 from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestRegressor
 from xgboost import XGBRegressor
-#from lightgbm import LGBMRegressor
+
 import pandas as pd
 import numpy as np
 from utils.metrics import evaluate
 import pickle
+
+try:
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+except NameError:
+    BASE_DIR = os.getcwd()
+
+OUTPUT_DIR = os.path.join(BASE_DIR, "output")
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+def out_path(*parts):
+    return os.path.join(OUTPUT_DIR, *parts)
+
 
 resultDict={}
 predictionDict={}
@@ -62,8 +62,9 @@ def display_plot(predictions_df, model_type,filename):
         plt.legend()
         plt.xticks(rotation=45)
         plt.tight_layout()
-        file_path = os.path.join(BASE_DIR, "output", filename)
+        file_path = out_path(filename)
         plt.savefig(file_path)
+
         plt.show()
 
 def predict_raw_prices_model(filename, model_type='xgb', split_date='2020-01-01'):
@@ -76,9 +77,10 @@ def predict_raw_prices_model(filename, model_type='xgb', split_date='2020-01-01'
     df_test = prices_data.loc[prices_data['Date'] > split_date]
 
     print(f"{len(df_training)} months of the training data {len(df_test)} months of testing data")
+        
+    df_training.to_csv(out_path('training.csv'))
+    df_test.to_csv(out_path('test.csv'))
 
-    df_training.to_csv('output/training.csv')
-    df_test.to_csv('output/test.csv')
 
     def create_time_features(df, target=None):
         """
@@ -277,7 +279,7 @@ def plot_result(df):
     ax2.tick_params(axis='y', labelcolor=color)
     
     fig.tight_layout()  # otherwise the right y-label is slightly clipped
-    file_path = os.path.join(BASE_DIR, "output", "predictions.png")
+    file_path = out_path(filename)
     plt.savefig(file_path)
     graph=plt.show()
    
@@ -486,58 +488,15 @@ if __name__ == "__main__":
    
     split_date='2024-07-01'
 
-    # dfPricesXGBoost, mergedPricesXGBoost = SMPP_XGBoost(fileName1, fileName2)    
-    # #print("The amount of variability of the supplier prices that is explained by the raw material prices is %.2f" % score)
-    # mergedPrices=mergedPricesXGBoost.rename(columns={"column_1": "RMPP", "column": "SMPP"})
-    # df=pd.concat([mergedPrices, dfPricesXGBoost])
-    # df = df.reset_index(drop=True)
-    # file_path1 = os.path.join(BASE_DIR, "output", "forecastXGBoost.csv")
-    # df.to_csv(file_path1)
-    # plot_result(df)
-
-    # dfPricesLightBM, mergedPricesLightBM =SMPP_LightBM(fileName1, fileName2)    
-    # #print("The amount of variability of the supplier prices that is explained by the raw material prices is %.2f" % score)
-    # mergedPrices=mergedPricesLightBM.rename(columns={"column_1": "RMPP", "column": "SMPP"})
-    # df2=pd.concat([mergedPrices, dfPricesLightBM])
-    # df2 = df2.reset_index(drop=True)
-    # file_path2 = os.path.join(BASE_DIR, "output", "forecastLightBM.csv")
-    # df2.to_csv(file_path2)
-    # plot_result(df2)
-
-
-    dfPricesRF, mergedPricesRF = SMPP_XGBoost(fileName1, fileName2, split_date)    
-    #print("The amount of variability of the supplier prices that is explained by the raw material prices is %.2f" % score)
-    # mergedPrices=mergedPricesRF.rename(columns={"column_1": "RMPP", "column": "SMPP"})
-    # df3=pd.concat([mergedPrices, dfPricesRF])
-    # df3 = df3.reset_index(drop=True)
-    file_path2 = os.path.join(BASE_DIR, "output", "forecastXGBoost.csv")
-    dfPricesRF.to_csv(file_path2)
-    #plot_result(df3)
-
-    # dfPricesARIMA, mergedPricesARIMA = SMPP_ARIMA(fileName1, fileName2)    
-    # #print("The amount of variability of the supplier prices that is explained by the raw material prices is %.2f" % score)
-    # mergedPrices=mergedPricesARIMA.rename(columns={"column_1": "RMPP", "column": "SMPP"})
-    # df=pd.concat([mergedPrices, dfPricesARIMA])
-    # df = df.reset_index(drop=True)
-    # file_path1 = os.path.join(BASE_DIR, "output", "forecastARIMA.csv")
-    # df.to_csv(file_path1)
-    # plot_result(df)
-
-    # dfPricesHoltWinter, mergedPricesHoltWinter = SMPP_HoltWinter(fileName1, fileName2)    
-    # #print("The amount of variability of the supplier prices that is explained by the raw material prices is %.2f" % score)
-    # mergedPrices=mergedPricesHoltWinter.rename(columns={"column_1": "RMPP", "column": "SMPP"})
-    # df=pd.concat([mergedPrices, dfPricesHoltWinter])
-    # df = df.reset_index(drop=True)
-    # file_path1 = os.path.join(BASE_DIR, "output", "forecastHoltWinter.csv")
-    # df.to_csv(file_path1)
-    # plot_result(df)
-
-    with open('output/scores.pickle', 'wb') as handle:
+    dfPricesRF, mergedPricesRF = SMPP_XGBoost(fileName1, fileName2, split_date) 
+    
+    dfPricesRF.to_csv(out_path('forecastXGBoost.csv')) 
+    with open(out_path('scores.pickle'), 'wb') as handle:
         pickle.dump(resultDict, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-    with open('output/predictions.pickle', 'wb') as handle:
+    with open(out_path('predictions.pickle'), 'wb') as handle:
         pickle.dump(predictionDict, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-    with open('output/scores.pickle', 'rb') as handle:
+    with open(out_path('scores.pickle'), 'rb') as handle:
         resultsDict = pickle.load(handle)
-        print(resultsDict)
+
