@@ -60,6 +60,7 @@ def display_plot(predictions_df, model_type,filename):
         plt.xlabel('Date')
         plt.ylabel('Value')
         plt.legend()
+        plt.ylim(bottom=0) 
         plt.xticks(rotation=45)
         plt.tight_layout()
         file_path = out_path(filename)
