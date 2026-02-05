@@ -1,4 +1,0 @@
-simulation_name,demand_variation,init_shortage,end_shortage,total_costs_euros,total_income_euros,total_profit_euros,total_logistic_costs_euros,total_production_costs_euros,total_distribution_costs_euros,total_purchasing_costs_euros,total_ordering_costs_euros,total_holding_costs_euros,total_emissions(kgCO2e),total_distribution_emissions(kgCO2e),production_capacity_utilization(%),downtime_rate(%),setup_time(%),OTIF(%),stockouts(%),out_of_time(%),not_in_full(%)
-OPTIMAL_STRESS_TEST,0,-1,-1,97028,174668,77640,63899,28328,4800,57621,500,977,4800,4800,27,0,1,100,0,0,0
-STRESS_TEST,0,-1,-1,110329,174668,64339,76884,28644,4800,70606,500,977,4800,4800,27,0,1,100,0,0,0
-OPTIMAL_STRESS_TEST,0,-1,-1,97028,174668,77640,63899,28328,4800,57621,500,977,4800,4800,27,0,1,100,0,0,0

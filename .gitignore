@@ -1,14 +1,64 @@
-# Python cache
+
+# ---------------------------
+# PYTHON BASICS
+# ---------------------------
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
 
-# Virtual environments
-env_app/
+# Pickle generados
+*.pkl
+*.pickle
+
+# ---------------------------
+# NOTEBOOKS
+# ---------------------------
+.ipynb_checkpoints/
+*.ipynb
+
+# ---------------------------
+# VIRTUAL ENVS
+# ---------------------------
+env/
 venv/
-*.env
+env_app/
+.venv/
 
-# Streamlit/IDE temp files
-.vs/
+# ---------------------------
+# OUTPUTS (NO VERSIONAR)
+# ---------------------------
+output/
+logs/
+*.log
+*.tmp
+*.png
+*.svg
+
+# ---------------------------
+# ENTRADAS IMPORTANTES (NO IGNORAR)
+# Sacamos CSV y JSON de los outputs, no del proyecto entero
+# ---------------------------
+
+# Ignorar solo CSV generados (en output/)
+output/**/*.csv
+
+# NO ignorar CSV de entrada
+!input/*.csv
+!metadata/*.json
+!input/*.json
+
+# ---------------------------
+# IDE & SISTEMA OPERATIVO
+# ---------------------------
 .vscode/
+.vs/
 .DS_Store
 Thumbs.db
+
+# ---------------------------
+# MISC
+# ---------------------------
+* - copia.py
+*copy*
+*_backup*
