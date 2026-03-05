@@ -28,31 +28,18 @@ from utils.scdt_Report import create_filled_report, save_to_json
 #from reportlab.lib.utils import ImageReader
 from dataclasses import dataclass, asdict
 from aas.aas_client import AASClient
-from dataclasses import dataclass, asdict
 from typing import List, Optional
-import yaml
-from pathlib import Path
 
-#-------------------------------------for the report generation and submission to the AAS-----------------
-def load_config(path: str = "config.yaml") -> dict:
-    """Carga el archivo config.yaml y devuelve un diccionario."""
-    config_path = Path(path)
-    if not config_path.exists():
-        raise FileNotFoundError(f"No se encontró el archivo {path}")
-
-    with open(config_path, "r") as f:
-        config = yaml.safe_load(f)
-
-    return config
 
 @dataclass
 class AASConfig:
     base_url:str
     client_id: str
     client_secret: str
+    token_url: str
     aas_id_short: str = "SCDTReports_AAS"
     submodel_id_short: str = "Reports"
-
+    
 def _draw_multiline_text(c: canvas.Canvas, x: int, y: int, text: str, leading: int = 14, max_width: int = 520):
     """
     render text  (\n).
@@ -120,7 +107,7 @@ def build_pdf(title, notes, image_paths, header_data):
     ))
 
     story = []
-
+    st.sidebar.write("DEBUG base_url:", aas_url)
     # --- Portada / encabezado visible en página 1 ---
     story.append(Paragraph(header_data.get("title", title), styles["TitleH1"]))
     meta_line = f"{header_data.get('type','')} — {header_data.get('date', datetime.now().strftime('%Y-%m-%d %H:%M'))}"
@@ -189,63 +176,6 @@ def build_pdf(title, notes, image_paths, header_data):
     buf.close()
     return pdf_bytes 
 
-
-# def build_pdf(
-#     title: str,
-#     subtitle_lines: List[str],
-#     image_paths: List[str],
-#     notes: Optional[str] = None,
-#     input_values: Optional[str] = None,         
-#     small_kpi_images: Optional[List[str]] = None, 
-#     extra_section: Optional[str] = None           
-# ) -> bytes:
-#     """
-#     Crea un PDF en memoria con título, subtítulo (líneas), imágenes (si existen) y notas.
-#     Devuelve bytes del PDF.
-#     """
-#     buf = io.BytesIO()
-#     c = canvas.Canvas(buf, pagesize=letter)
-#     width, height = letter
-
-#     # Portada
-#     c.setFont("Helvetica-Bold", 20)
-#     c.drawString(50, height - 60, title)
-
-#     c.setFont("Helvetica", 12)
-#     y = height - 85
-#     for line in subtitle_lines:
-#         c.drawString(50, y, line)
-#         y -= 16
-
-#     # Imágenes (máximo dos por página)
-#     x_img, w_img, h_img, y_start, y_gap = 50, 500, 230, y - 20, 20
-#     current_y = y_start
-#     items_in_page = 0
-
-#     for p in image_paths:
-#         if os.path.exists(p):
-#             if items_in_page == 2:
-#                 c.showPage()
-#                 c.setFont("Helvetica-Bold", 16)
-#                 c.drawString(50, height - 50, "Charts")
-#                 current_y = height - 90
-#                 items_in_page = 0
-#             c.drawImage(p, x_img, current_y - h_img, width=w_img, height=h_img, preserveAspectRatio=True, anchor='n')
-#             current_y -= (h_img + y_gap)
-#             items_in_page += 1
-
-#     # Notas
-#     if notes:
-#         c.showPage()
-#         c.setFont("Helvetica-Bold", 16)
-#         c.drawString(50, height - 50, "Notes / Comments")
-#         c.setFont("Helvetica", 12)
-#         _draw_multiline_text(c, 50, height - 80, notes, leading=14)
-
-#     c.save()
-#     buf.seek(0)
-#     return buf.read()
-
 def save_fig(fig, path):
     fig.tight_layout()
     fig.savefig(path, dpi=150, bbox_inches="tight")
@@ -293,19 +223,53 @@ def create_and_optionally_store_report(
         client = AASClient(
             base_url=aas_cfg.base_url,
             client_id=aas_cfg.client_id,
-            client_secret=aas_cfg.client_secret
+            client_secret=aas_cfg.client_secret,
+            token_url=aas_cfg.token_url  
         )
         token_info = client.authenticate()
-        # Puedes loguear condicionalmente:
-        # st.write("Token obtenido:", token_info)
+       
+        st.write("Uploading report:", reportID)
+    
 
-        result = client.update_submodel_element_value(
+        result =client.update_submodel_element_value(
             aas_id_short=aas_cfg.aas_id_short,
             sm_id_short=aas_cfg.submodel_id_short,
-            se_id_short_path=reportID,
-            value=report_json
+            se_id_short_path="Report_ID.content.title",
+            value=strTitle
         )
-        # st.write("Resultado AAS:", result)
+        st.write("AAS response title:", result)
+
+        result =client.update_submodel_element_value(
+            aas_id_short=aas_cfg.aas_id_short,
+            sm_id_short=aas_cfg.submodel_id_short,
+            se_id_short_path="Report_ID.content.analysis",
+            value=strAnalysis
+        )
+        st.write("AAS response analysis:", result)
+
+        result =client.update_submodel_element_value(
+            aas_id_short=aas_cfg.aas_id_short,
+            sm_id_short=aas_cfg.submodel_id_short,
+            se_id_short_path="Report_ID.report.type",
+            value=strType
+        )
+        st.write("AAS response type:", result)
+
+        result =client.update_submodel_element_value(
+            aas_id_short=aas_cfg.aas_id_short,
+            sm_id_short=aas_cfg.submodel_id_short,
+            se_id_short_path="Report_ID.report.timestamp",
+            value=datetime.now().isoformat()
+        )
+        st.write("AAS response timestamp:", result)
+               
+        result =client.update_submodel_element_value(
+            aas_id_short=aas_cfg.aas_id_short,
+            sm_id_short=aas_cfg.submodel_id_short,
+            se_id_short_path="Report_ID.content.attachment",
+            value=pdf_blob
+        )
+        st.write("AAS response pdf:", result)
 
     return scdt_Report
 
@@ -348,15 +312,15 @@ df_supplier_material = df_materials_suppliers[(df_materials_suppliers["SupplierI
 reorder_quantity_init = int(df_supplier_material["ReorderQuantity"].iloc[0])   
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 st.set_page_config(layout="wide", page_title="R3Group Supply Chain Proof of Concept")
-config = load_config()
 
-#-----------config AAS-----------
-  #config server AAS
-aas_url = config["base_url"]
-aas_client = config["client_id"]
-aas_secret = client_secret = config["client_secret"]
-aas_id_short = "SCDTReports_AAS"
-aas_sm_id_short = "Reports"
+#------------------------------st.secrets--------------------------------------
+aas_url = st.secrets["AAS"]["base_url"]
+aas_client = st.secrets["AAS"]["client_id"]
+aas_secret = st.secrets["AAS"]["client_secret"]
+token_url = st.secrets["AAS"]["token_url"]
+aas_id_short = st.secrets["AAS"]["aas_id_short"]
+aas_sm_id_short = st.secrets["AAS"]["submodel_id_short"]
+
 
 st.markdown(
     """
@@ -633,7 +597,8 @@ The forecasted values are derived via simple linear regression from the last 12 
             client_id=aas_client,
             client_secret=aas_secret,
             aas_id_short=aas_id_short,
-            submodel_id_short=aas_sm_id_short
+            submodel_id_short=aas_sm_id_short,
+            token_url=token_url
         )
 
         scdt_report = create_and_optionally_store_report(
@@ -907,7 +872,8 @@ with tabs[2]:
                 client_id=aas_client,
                 client_secret=aas_secret,
                 aas_id_short=aas_id_short,
-                submodel_id_short=aas_sm_id_short
+                submodel_id_short=aas_sm_id_short,
+                token_url=token_url
             )
                    
 
@@ -1178,7 +1144,8 @@ with tabs[3]:
                 client_id=aas_client,
                 client_secret=aas_secret,
                 aas_id_short=aas_id_short,
-                submodel_id_short=aas_sm_id_short
+                submodel_id_short=aas_sm_id_short,
+                token_url=token_url
             )
                    
 

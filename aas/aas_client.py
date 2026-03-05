@@ -1,56 +1,120 @@
 import requests
-
-#Class to represent a AAS client object and perform requests to the AAS server
+import base64
+import json
+from pathlib import Path
 
 class AASClient:
-    def __init__(self, base_url, token=None, client_id=None, client_secret=None):
+    def __init__(
+        self, base_url, client_id=None, client_secret=None,
+        token_url=None, token=None, verify_ssl=True, cert_path=None
+    ):
         """
-        Initialise the client for the AAS api.
-        :param base_url: base URL of the AAS server (without "/api") (ex: "https://aas.amlaval.fr")
-        :param token: null here, will be defined in authentication call
-        :param client_id: user name for authentication
-        :param client_secret: password for authentication
+        verify_ssl: True para validar el certificado del servidor (producción)
+                    False para saltarse la validación (solo local temporal)
+        cert_path: ruta a certificado CA custom para test/local
         """
         self.base_url = base_url.rstrip("/")
-        self.token = token
         self.client_id = client_id
         self.client_secret = client_secret
+        self.token_url = token_url
+        self.access_token = token
+        self.verify_ssl = verify_ssl
+        self.cert_path = cert_path
 
+    def _verify(self):
+        """
+        Decide qué usar para la verificación SSL en requests.
+        """
+        if self.cert_path:
+            cert_file = Path(self.cert_path)
+            if cert_file.exists():
+                return str(cert_file.resolve())
+            else:
+                raise FileNotFoundError(f"Certificado no encontrado: {self.cert_path}")
+        return self.verify_ssl
+
+    # ----------------------------------------------------------------------
+    # AUTHENTICATION
+    # ----------------------------------------------------------------------
     def authenticate(self):
-        """
-        Authenticate with provided client_id and client_secret.
-        """
-        url = f"{self.base_url}/auth/oauth2/token"
+        if not self.token_url:
+            raise RuntimeError("No se ha configurado token_url en AASClient")
+
+        basic = base64.b64encode(f"{self.client_id}:{self.client_secret}".encode()).decode()
+        headers = {
+            "Authorization": f"Basic {basic}",
+            "Content-Type": "application/x-www-form-urlencoded",
+        }
         data = {
-                    "grant_type": "client_credentials",
-                    "scope": "*:create *:read *:update *:delete *:invoke"
-                }
-        response = requests.post(url, data=data, auth=(self.client_id, self.client_secret))
+            "grant_type": "client_credentials",
+            "scope": "*:create *:read *:update *:delete *:invoke"
+        }
+        response = requests.post(self.token_url, headers=headers, data=data, verify=self._verify())
         response.raise_for_status()
         token_info = response.json()
-        self.token = token_info.get("access_token")
-        return token_info 
+        self.access_token = token_info.get("access_token")
+        if not self.access_token:
+            raise RuntimeError("No se recibió access_token al autenticar")
+        return token_info
 
+    # ----------------------------------------------------------------------
+    # INTERNAL HEADERS
+    # ----------------------------------------------------------------------
     def _headers(self):
-        headers = {"Content-Type": "application/json"}
-        if self.token:
-            headers["Authorization"] = f"Bearer {self.token}"
-        return headers
-    def update_submodel_element_value(self, aas_id_short, sm_id_short, se_id_short_path, value):
-        """
-        Endpoint to Update a submodel element.
-        :param aas_id_short: idshort of the AAS
-        :param sm_id_short: idshort of the submodel
-        :param se_id_short_path: idshort of the submodelElement (to create or update)
-        :param value: Valeur sérialisée (dict ou str)
-        """
-        url = f"{self.base_url}/api/shell/{aas_id_short}/aas/submodels/{sm_id_short}/submodel/submodelElements/{se_id_short_path}"
-        response = requests.put(url, data=value, headers=self._headers())
+        if not self.access_token:
+            raise RuntimeError("No access token. Call authenticate() first.")
+        return {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.access_token}"
+        }
+
+    # ----------------------------------------------------------------------
+    # GET / LIST / UPDATE
+    # ----------------------------------------------------------------------
+    def list_aas(self):
+        url = f"{self.base_url}/shell/"
+        response = requests.get(url, headers=self._headers(), verify=self._verify())
         return self._handle_response(response)
 
+    def get_submodels(self, aas_id_short):
+        url = f"{self.base_url}/shell/{aas_id_short}/submodels"
+        response = requests.get(url, headers=self._headers(), verify=self._verify())
+        return self._handle_response(response)
+
+    def list_submodel_elements(self, aas_id_short, sm_id_short):
+        url = f"{self.base_url}/shell/{aas_id_short}/aas/submodels/{sm_id_short}/submodel/submodelElements"
+        response = requests.get(url, headers=self._headers(), verify=self._verify())
+        return self._handle_response(response)
+
+    def get_submodel_element(self, aas_id_short, sm_id_short, se_id_short_path):
+        url = (
+            f"{self.base_url}/shell/{aas_id_short}/aas/"
+            f"submodels/{sm_id_short}/submodel/submodelElements/{se_id_short_path}"
+        )
+        response = requests.get(url, headers=self._headers(), verify=self._verify())
+        return self._handle_response(response)
+
+    def get_submodel_element_value(self, aas_id_short, sm_id_short, se_id_short_path):
+        url = f"{self.base_url}/shell/{aas_id_short}/aas/submodels/{sm_id_short}/submodel/submodelElements/{se_id_short_path}/value"
+        response = requests.get(url, headers=self._headers(), verify=self._verify())
+        return self._handle_response(response)
+
+    def update_submodel_element_value(self, aas_id_short, sm_id_short, se_id_short_path, value):
+        body = json.dumps(value) if isinstance(value, dict) else value
+        url = f"{self.base_url}/shell/{aas_id_short}/aas/submodels/{sm_id_short}/submodel/submodelElements/{se_id_short_path}/value"
+        response = requests.put(url, headers=self._headers(), data=body, verify=self._verify())
+        return self._handle_response(response)
+
+    # ----------------------------------------------------------------------
+    # RESPONSE HANDLER
+    # ----------------------------------------------------------------------
     def _handle_response(self, response):
         try:
             response.raise_for_status()
-            return response.json()
+            return response.json() if response.text else {"status": "ok"}
         except requests.exceptions.HTTPError as e:
-            return {"error": str(e), "status_code": response.status_code, "details": response.text}
+            return {
+                "error": str(e),
+                "status_code": response.status_code,
+                "details": response.text
+            }
