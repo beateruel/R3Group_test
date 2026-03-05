@@ -107,7 +107,7 @@ def build_pdf(title, notes, image_paths, header_data):
     ))
 
     story = []
-    st.sidebar.write("DEBUG base_url:", aas_url)
+    #st.sidebar.write("DEBUG base_url:", aas_url)
     # --- Portada / encabezado visible en página 1 ---
     story.append(Paragraph(header_data.get("title", title), styles["TitleH1"]))
     meta_line = f"{header_data.get('type','')} — {header_data.get('date', datetime.now().strftime('%Y-%m-%d %H:%M'))}"
@@ -228,7 +228,7 @@ def create_and_optionally_store_report(
         )
         token_info = client.authenticate()
        
-        st.write("Uploading report:", reportID)
+        #st.write("Uploading report:", reportID)
     
 
         result =client.update_submodel_element_value(
@@ -237,7 +237,7 @@ def create_and_optionally_store_report(
             se_id_short_path="Report_ID.content.title",
             value=strTitle
         )
-        st.write("AAS response title:", result)
+        #st.write("AAS response title:", result)
 
         result =client.update_submodel_element_value(
             aas_id_short=aas_cfg.aas_id_short,
@@ -245,7 +245,7 @@ def create_and_optionally_store_report(
             se_id_short_path="Report_ID.content.analysis",
             value=strAnalysis
         )
-        st.write("AAS response analysis:", result)
+        #st.write("AAS response analysis:", result)
 
         result =client.update_submodel_element_value(
             aas_id_short=aas_cfg.aas_id_short,
@@ -253,7 +253,7 @@ def create_and_optionally_store_report(
             se_id_short_path="Report_ID.report.type",
             value=strType
         )
-        st.write("AAS response type:", result)
+        #st.write("AAS response type:", result)
 
         result =client.update_submodel_element_value(
             aas_id_short=aas_cfg.aas_id_short,
@@ -261,7 +261,7 @@ def create_and_optionally_store_report(
             se_id_short_path="Report_ID.report.timestamp",
             value=datetime.now().isoformat()
         )
-        st.write("AAS response timestamp:", result)
+        #st.write("AAS response timestamp:", result)
                
         result =client.update_submodel_element_value(
             aas_id_short=aas_cfg.aas_id_short,
@@ -269,7 +269,7 @@ def create_and_optionally_store_report(
             se_id_short_path="Report_ID.content.attachment",
             value=pdf_blob
         )
-        st.write("AAS response pdf:", result)
+        #st.write("AAS response pdf:", result)
 
     return scdt_Report
 
